@@ -1,0 +1,25 @@
+CREATE USER my_bank_user IDENTIFIED BY my_bank_user;
+
+GRANT ALL PRIVILEGES TO my_bank_user;
+
+
+CREATE TABLE users (
+    user_id NUMBER PRIMARY KEY,
+    username VARCHAR2(50) UNIQUE NOT NULL,
+    password_hash VARCHAR2(256) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone_number VARCHAR2(15),
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    date_of_birth DATE,
+    address VARCHAR2(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profile_updated CHAR(1) DEFAULT 'N' CHECK (profile_updated IN ('Y', 'N')),
+    status VARCHAR2(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'))
+);
+
+
+
+
+http://localhost:8081/swagger-ui/index.html
