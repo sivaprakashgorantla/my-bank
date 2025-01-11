@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router'; // Import Router for redirection
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -15,46 +15,43 @@ import { Router } from '@angular/router'; // Import Router for redirection
 export class LoginComponent {
 
   loginForm: FormGroup;
-  loading = false;  // To show a loading indicator during the login process
-  errorMessage = '';  // To display error messages to the user
+  loading = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router  // Inject Router to navigate after login
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]], // Updated form control
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onSubmit() {
     if (this.loginForm.valid) {
-      this.loading = true;  // Set loading to true during login
-      this.errorMessage = '';  // Clear any previous error messages
+      this.loading = true;
+      this.errorMessage = '';
 
       // Call the login method from AuthService
-      this.authService.login(this.loginForm.value.email, this.loginForm.value.password)
+      this.authService.login(this.loginForm.value.username, this.loginForm.value.password) // Updated to use username
         .subscribe({
           next: (response) => {
             console.log('Login Response: ', response);
-            this.authService.saveToken(response.token);  // Save the token
-            this.router.navigate(['/dashboard']);  // Navigate to the dashboard (or any other page)
+            this.authService.saveToken(response.token);
+            this.router.navigate(['/dashboard']);
           },
           error: (error) => {
             console.error('Login Error:', error);
-            this.errorMessage = 'Invalid credentials, please try again.';  // Show error message
-            this.loading = false;  // Stop loading on error
+            this.errorMessage = 'Invalid credentials, please try again.';
+            this.loading = false;
           },
           complete: () => {
-            this.loading = false;  // Stop loading once the request is complete
+            this.loading = false;
           }
         });
-
-      console.log('Login Data: ', this.loginForm.value);
     } else {
-      // If the form is invalid, you can show an appropriate error message
       this.errorMessage = 'Please fill in all fields correctly.';
     }
   }

@@ -3,7 +3,7 @@ package com.sivaprakash.auth_service.dto;
 public class LoginRequestDTO {
     private String username;
     private String password;
-
+ 
     public LoginRequestDTO() {
     }
 

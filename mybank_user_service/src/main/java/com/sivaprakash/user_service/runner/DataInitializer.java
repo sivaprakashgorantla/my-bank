@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.repository.UserRepository;
 
-//@Component
+@Component
 public class DataInitializer {
 
     @Bean
@@ -28,7 +28,7 @@ public class DataInitializer {
             // Check if the database already contains users
             if (userRepository.count() == 0) {
                 // Save all users in the database
-                userRepository.saveAll(Arrays.asList(user1, user2, user3, user4, user5));
+                //userRepository.saveAll(Arrays.asList(user1, user2, user3, user4, user5));
                 System.out.println("Dummy users have been added to the database.");
             } else {
                 System.out.println("Database already contains data. Skipping default data insertion.");

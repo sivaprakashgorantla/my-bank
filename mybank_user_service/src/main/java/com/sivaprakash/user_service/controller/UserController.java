@@ -1,5 +1,7 @@
 package com.sivaprakash.user_service.controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,6 @@ import com.sivaprakash.user_service.dto.UserResponseDTO;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.service.UserService;
 
-import jakarta.persistence.criteria.ListJoin;
-import java.util.*;
-
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -33,33 +32,23 @@ public class UserController {
 	@Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/")
-    public List<User> sayHello() {
-    	System.out.println("----------------getAllUsers-------------------------");
-        return userService.getAllUsers();
-    }
-    // Register endpoint (Step 1)
+
 	@PostMapping("/register")
-	public ResponseEntity<?> registerUser(@RequestBody User user) {
+	public ResponseEntity<?> registerUser(@RequestBody User registerUser) {
+		System.out.println("registerUser : "+registerUser);
 		try {
 			// Register the user and send OTP
-			return ResponseEntity.ok(userService.registerUser(user));
+			return ResponseEntity.ok(userService.registerUser(registerUser));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 
 	
-    @GetMapping("/greatings")
-    public List<User> greatings() {
-    	System.out.println("----------------greatings-------------------------");
-        return userService.getAllUsers();
-    }
-
 	@PostMapping("/validate")
     public ResponseEntity<UserResponseDTO> validateUser(@RequestBody LoginRequestDTO loginRequest) {
         User userData = userService.validateUser(loginRequest.getUsername());
-        System.out.println("User controller validate : "+userData.getPassword());
+        System.out.println("User controller validate : "+userData);
         System.out.println("User controller validate encoder : "+passwordEncoder.encode(loginRequest.getPassword()));
         if (userData != null && passwordEncoder.matches(loginRequest.getPassword(), userData.getPassword())) {
 
@@ -68,7 +57,9 @@ public class UserController {
                     userData.getUsername(),
                     userData.getEmail(),
                     userData.getRole()
+	
             );
+            System.out.println("response :"+response);
             return ResponseEntity.ok(response);
         }
 
@@ -87,6 +78,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+
 
 	// OTP verification endpoint (Step 6)
 	@PostMapping("/verify-otp")
@@ -118,25 +110,26 @@ public class UserController {
 	}
 
 	// Update customer ID
-	@PutMapping("/{userId}/update-customer-id")
-	public ResponseEntity<?> updateCustomerId(@PathVariable Long userId, @RequestParam String customerId) {
-		try {
-			return ResponseEntity.ok(userService.updateCustomerId(userId, customerId));
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}
-
-	// update user profile based on user id
 	@PutMapping("/{userId}")
-	public ResponseEntity<?> updateUserProfile(@PathVariable Long userId, @RequestBody User user) {
+	public ResponseEntity<?> updateUserProfile(@RequestBody User updateUser) {
 		try {
-			return ResponseEntity.ok(userService.updateUserProfile(userId, user));
+			System.out.println("updated updateUser controller  save : "+updateUser);
+			return ResponseEntity.ok(userService.updateUser(updateUser));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-
 	}
+//
+//	// update user profile based on user id
+//	@PutMapping("/{userId}")
+//	public ResponseEntity<?> updateUserProfile(@PathVariable Long userId, @RequestBody User user) {
+//		try {
+//			return ResponseEntity.ok(userService.updateUserProfile(userId, user));
+//		} catch (IllegalArgumentException e) {
+//			return ResponseEntity.badRequest().body(e.getMessage());
+//		}
+//
+//	}
 
 	// create a endpoint to get user by id and create a endpoint to delete user by
 	// id

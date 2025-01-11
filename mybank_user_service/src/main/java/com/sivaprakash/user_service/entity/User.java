@@ -41,7 +41,7 @@ public class User {
 
     private String customerId;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
@@ -228,4 +228,23 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now(); // Optionally set updatedAt to the same time
+        }
+    }
+    
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", username=" + username + ", password=" + password + ", email=" + email
+				+ ", phoneNumber=" + phoneNumber + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", dateOfBirth=" + dateOfBirth + ", address=" + address + ", otp=" + otp + ", customerId="
+				+ customerId + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", profileUpdated="
+				+ profileUpdated + ", status=" + status + ", role=" + role + "]";
+	}
+    
+    
 }

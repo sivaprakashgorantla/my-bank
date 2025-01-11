@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sivaprakash.user_service.entity.User;
@@ -16,6 +18,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
 // get all users from the database
     public List<User> getAllUsers() {
         return (List<User>) userRepository.findAll();
@@ -39,13 +44,15 @@ public class UserService {
 
     // Register user and send OTP
     public User registerUser(User user) {
+    	System.out.println("registerUser Service : "+user);
+    	
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
-        
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         
         sendOtp(savedUser); // Send OTP after user is saved
@@ -89,12 +96,15 @@ public class UserService {
     }
     // Update customer ID for the user
 
-    public User updateCustomerId(Long userId, String customerId) {
+    public User updateUser(User updateUser) {
         try {
-            User user = userRepository.findById(userId)
+            User user = userRepository.findById(updateUser.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            user.setCustomerId(customerId);
+            BeanUtils.copyProperties(updateUser, user);
+            user.setProfileUpdated("Y");
+            System.out.println("updated user before save : "+user);
             return userRepository.save(user);
+            
         } catch (Exception e) {
             throw new RuntimeException("Failed to update customer ID", e);
         }

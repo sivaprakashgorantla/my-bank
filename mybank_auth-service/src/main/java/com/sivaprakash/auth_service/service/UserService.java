@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.sivaprakash.auth_service.dto.LoginRequestDTO;
+import com.sivaprakash.auth_service.dto.RegisterRequestDTO;
 import com.sivaprakash.auth_service.dto.UserResponseDTO;
 
 @Service
@@ -34,4 +35,23 @@ public class UserService {
 
         return userResponseDTO;
     }
+
+    public UserResponseDTO registerUser(RegisterRequestDTO registerRequest) {
+        String url = "http://localhost:8081/api/v1/users/register";
+        System.out.println("user service : validateUser"+registerRequest.getUsername());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        UserResponseDTO userResponseDTO = null;
+		try {
+			HttpEntity<RegisterRequestDTO> request = new HttpEntity<>(registerRequest, headers);
+			userResponseDTO = restTemplate.postForObject(url, request, UserResponseDTO.class);
+		} catch (RestClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+        return userResponseDTO;
+    }
+
 }

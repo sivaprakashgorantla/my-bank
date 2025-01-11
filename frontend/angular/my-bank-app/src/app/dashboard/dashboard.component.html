@@ -1,0 +1,18 @@
+<p>Dashboard works!</p>
+
+<div class="dashboard-container">
+  <h2>Dashboard</h2>
+
+  <!-- Profile Menu -->
+  <div class="profile-menu">
+    <button (click)="toggleProfileMenu()">Profile</button>
+    <ul *ngIf="showProfileMenu">
+      <li><a routerLink ="/view-profile">View Profile</a></li>
+      <li><a routerLink ="/update-profile">Edit Profile</a></li>
+    </ul>
+  </div>
+
+  <div class="links" style="text-align: left; margin-top: 20px; text-align: center;">
+    <p>Welcome, {{ username }}</p>
+  </div>
+</div>
