@@ -8,5 +8,5 @@ import com.sivaprakash.account.service.entiry.Account;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findByUserId(Long userId);
+    List<Account> findByCustomerId(String customerId);
 }

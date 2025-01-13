@@ -17,55 +17,56 @@ import com.sivaprakash.account.service.repository.AccountRepository;
 public class AccountServiceImpl implements AccountService {
 
 	@Autowired
-    private  AccountRepository accountRepository;
-    
+	private AccountRepository accountRepository;
+
 	@Autowired
 	private RestTemplate restTemplate;
 
-    @Value("${user.service.url}")
-    private String userServiceUrl;
+	@Value("${user.service.url}")
+	private String userServiceUrl;
 
-    public List<AccountDetailsDTO> getAccountsByUserId(Long userId) {
-        List<Account> accounts = accountRepository.findByUserId(userId);
-        return accounts.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
+	/*
+	 * @Autowired private TransactionClient transactionClient;
+	 */
+	public boolean isProfileComplete(Long userId) {
+		System.out.println("isProfileComplete..............");
+		try {
 
+			CustomerProfileDTO profile = restTemplate.getForObject(userServiceUrl + "/api/v1/users/" + userId,
+					CustomerProfileDTO.class);
+			System.out.println("isProfileComplete.............." + profile);
+			return profile != null && profile.isProfileComplete();
+		} catch (Exception e) {
+			// Log the error
+			System.out.println("isProfileComplete....ERROR.........." + e.getMessage());
+			throw new RuntimeException("Error checking user profile status", e);
+		}
+	}
 
-    public boolean isProfileComplete(Long userId) {
-    	System.out.println("isProfileComplete..............");
-        try {
-            CustomerProfileDTO profile = restTemplate.getForObject(
-                userServiceUrl + "/api/v1/users/" + userId,
-                CustomerProfileDTO.class
-            );
-            System.out.println("isProfileComplete.............."+profile);
-            return profile != null && profile.isProfileComplete();
-        } catch (Exception e) {
-            // Log the error
-        	System.out.println("isProfileComplete....ERROR.........."+e.getMessage());
-            throw new RuntimeException("Error checking user profile status", e);
-        }
-    }
+	private AccountDetailsDTO convertToDTO(Account account) {
+		AccountDetailsDTO dto = new AccountDetailsDTO();
+		dto.setAccountId(account.getAccountId());
+		dto.setAccountType(getAccountTypeName(account.getAccountType()));
+		dto.setAccountNumber(account.getAccountNumber());
+		dto.setBalance(account.getBalance());
+		dto.setCurrencyCode(account.getCurrencyCode());
+		dto.setStatus(account.getStatus().name());
+		return dto;
+	}
 
-    private AccountDetailsDTO convertToDTO(Account account) {
-        AccountDetailsDTO dto = new AccountDetailsDTO();
-        dto.setAccountId(account.getAccountId());
-        dto.setAccountType(getAccountTypeName(account.getAccountType()));
-        dto.setAccountNumber(account.getAccountNumber());
-        dto.setBalance(account.getBalance());
-        dto.setCurrencyCode(account.getCurrencyCode());
-        dto.setStatus(account.getStatus().name());
-        return dto;
-    }
+	private String getAccountTypeName(Integer accountType) {
+		return switch (accountType) {
+		case 1 -> "Savings Account";
+		case 2 -> "Current Account";
+		case 3 -> "Fixed Deposit";
+		default -> "Unknown Account Type";
+		};
+	}
 
-    private String getAccountTypeName(Integer accountType) {
-        return switch (accountType) {
-            case 1 -> "Savings Account";
-            case 2 -> "Current Account";
-            case 3 -> "Fixed Deposit";
-            default -> "Unknown Account Type";
-        };
-    }
+	public List<AccountDetailsDTO> getAccountsByUserCustomerId(String customerId) {
+		// TODO Auto-generated method stub
+		List<Account> accounts = accountRepository.findByCustomerId(customerId);
+		return accounts.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
+
 }

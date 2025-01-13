@@ -47,9 +47,6 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "profile_updated", nullable = false, length = 1, columnDefinition = "CHAR(1) DEFAULT 'N'")
-    private String profileUpdated = "N"; // Default value is 'N'
-
     @Column(length = 20)
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
@@ -87,7 +84,6 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.status = status;
-        this.profileUpdated = profileUpdated;
         this.role = role;
     }
 
@@ -205,14 +201,6 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public String getProfileUpdated() {
-        return profileUpdated;
-    }
-
-    public void setProfileUpdated(String profileUpdated) {
-        this.profileUpdated = profileUpdated;
-    }
-
     public UserStatus getStatus() {
         return status;
     }
@@ -242,8 +230,7 @@ public class User {
 		return "User [userId=" + userId + ", username=" + username + ", password=" + password + ", email=" + email
 				+ ", phoneNumber=" + phoneNumber + ", firstName=" + firstName + ", lastName=" + lastName
 				+ ", dateOfBirth=" + dateOfBirth + ", address=" + address + ", otp=" + otp + ", customerId="
-				+ customerId + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", profileUpdated="
-				+ profileUpdated + ", status=" + status + ", role=" + role + "]";
+				+ customerId + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt  + ", status=" + status + ", role=" + role + "]";
 	}
     
     

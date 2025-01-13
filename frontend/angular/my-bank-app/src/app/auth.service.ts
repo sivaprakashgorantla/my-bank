@@ -22,12 +22,24 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
   // Login method
-  login(username: string, password: string): Observable<any> {
-    const loginPayload = { username, password };
-    return this.http.post<any>(`${this.authApiUrl}login`, loginPayload).pipe(
-      catchError((error) => this.handleError(error))
-    );
-  }
+  login(credentials: any): void {
+    this.http.post('http://localhost:7878/api/v1/auth/login', credentials).subscribe((response: any) => {
+        const { token, userId ,username,customerId} = response;
+        this.saveToken(token);
+        
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('username', username);
+        localStorage.setItem('customerId', customerId);
+        this.router.navigate(['/dashboard']);
+    });
+}
+
+  // login(username: string, password: string): Observable<any> {
+  //   const loginPayload = { username, password };
+  //   return this.http.post<any>(`${this.authApiUrl}login`, loginPayload).pipe(
+  //     catchError((error) => this.handleError(error))
+  //   );
+  // }
 
   // Register method
   register(
@@ -65,7 +77,7 @@ export class AuthService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}` // Add the Authorization header
     });
-    return this.http.get<any>(`${this.userApiUrl}73`,{headers});
+    return this.http.get<any>(`${this.userApiUrl}85`,{headers});
   }
 
   updateUserProfile(profile: any): Observable<any> {

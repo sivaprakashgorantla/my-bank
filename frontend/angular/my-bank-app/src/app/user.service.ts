@@ -28,7 +28,7 @@ export class UserService {
      const headers = new HttpHeaders({
        Authorization: `Bearer ${token}` // Add the Authorization header
      });
-     return this.http.get<any>(`${this.userApiUrl}73`,{headers});
+     return this.http.get<any>(`${this.userApiUrl}${userId}`,{headers});
    }
  
    updateUserProfile(profile: any): Observable<any> {
@@ -45,7 +45,7 @@ export class UserService {
      const headers = new HttpHeaders({
        Authorization: `Bearer ${token}` // Add the Authorization header
      });
-     return this.http.put<any>(`${this.userApiUrl}73`,profile, {headers});
+     return this.http.put<any>(`${this.userApiUrl}${userId}`,profile, {headers});
    }
  
  

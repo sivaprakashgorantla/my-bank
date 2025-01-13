@@ -39,6 +39,7 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource( request -> corsConfig))
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers("/api/v1/auth/**").permitAll().anyRequest().authenticated())
+//						auth -> auth.requestMatchers("/**").permitAll().anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(handling -> handling.authenticationEntryPoint((request, response, authException) -> {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -46,17 +47,4 @@ public class SecurityConfig {
 
 		return http.build();
 	}
-	/*
-	 * @Bean public CorsConfigurationSource corsConfigurationSource() {
-	 * CorsConfiguration configuration = new CorsConfiguration();
-	 * configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Allow
-	 * your frontend origin configuration.setAllowedMethods(List.of("GET", "POST",
-	 * "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
-	 * configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); //
-	 * Allowed headers configuration.setExposedHeaders(List.of("Authorization")); //
-	 * Expose headers configuration.setAllowCredentials(true); // Allow credentials
-	 * 
-	 * UrlBasedCorsConfigurationSource source = new
-	 * UrlBasedCorsConfigurationSource(); source.registerCorsConfiguration("/**",
-	 * configuration); return source; }
-	 */}
+}

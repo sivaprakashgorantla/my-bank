@@ -11,8 +11,8 @@ public class Account {
     @SequenceGenerator(name = "account_id_seq", sequenceName = "account_id_seq", allocationSize = 1)
     private Long accountId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "customerid", nullable = true)
+    private String customerId;
 
     @Column(name = "account_type", nullable = false)
     private Integer accountType;
@@ -41,11 +41,11 @@ public class Account {
 		super();
 	}
 
-	public Account(Long accountId, Long userId, Integer accountType, String accountNumber, BigDecimal balance,
+	public Account(Long accountId, String  customerId, Integer accountType, String accountNumber, BigDecimal balance,
 			String currencyCode, LocalDateTime createdAt, LocalDateTime updatedAt, AccountStatus status) {
 		super();
 		this.accountId = accountId;
-		this.userId = userId;
+		this.customerId = customerId;
 		this.accountType = accountType;
 		this.accountNumber = accountNumber;
 		this.balance = balance;
@@ -66,15 +66,14 @@ public class Account {
 	}
 
 
-	public Long getUserId() {
-		return userId;
+
+	public String getCustomerId() {
+		return customerId;
 	}
 
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
 	}
-
 
 	public Integer getAccountType() {
 		return accountType;
@@ -149,7 +148,7 @@ public class Account {
 	
 	@Override
 	public String toString() {
-		return "Account [accountId=" + accountId + ", userId=" + userId + ", accountType=" + accountType
+		return "Account [accountId=" + accountId + ", customerId=" + customerId + ", accountType=" + accountType
 				+ ", accountNumber=" + accountNumber + ", balance=" + balance + ", currencyCode=" + currencyCode
 				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", status=" + status + "]";
 	}

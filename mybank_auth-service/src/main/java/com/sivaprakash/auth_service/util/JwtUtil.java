@@ -19,8 +19,13 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(String username,Long userId) {
-        return Jwts.builder().setSubject(username).claim("userid", userId).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + expiration)).signWith(getSignKey(), SignatureAlgorithm.HS384).compact();
+    public String generateToken(String username,Long userId,String customerId) {
+        return Jwts.builder().setSubject(username)
+        		.claim("userid", userId)
+        		.claim("customerId", customerId)
+        		.setIssuedAt(new Date())
+        		.setExpiration(new Date(System.currentTimeMillis() + expiration))
+        		.signWith(getSignKey(), SignatureAlgorithm.HS384).compact();
     }
 
     private Key getSignKey() {

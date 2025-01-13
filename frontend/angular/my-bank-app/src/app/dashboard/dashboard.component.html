@@ -1,18 +1,61 @@
-<p>Dashboard works!</p>
-
 <div class="dashboard-container">
-  <h2>Dashboard</h2>
+  <h2 class="dashboard-title">Dashboard</h2>
 
-  <!-- Profile Menu -->
+  <!-- Profile Dropdown Menu -->
   <div class="profile-menu">
-    <button (click)="toggleProfileMenu()">Profile</button>
-    <ul *ngIf="showProfileMenu">
-      <li><a routerLink ="/view-profile">View Profile</a></li>
-      <li><a routerLink ="/update-profile">Edit Profile</a></li>
+    <button class="profile-btn" (click)="toggleProfileMenu()">
+      Profile <span>&#9662;</span>
+    </button>
+    <ul class="dropdown-menu" *ngIf="showProfileMenu">
+      <li>
+        <a routerLink="/view-profile" [class.active]="isActive('/view-profile')">
+          View Profile
+        </a>
+      </li>
+      <li>
+        <a routerLink="/update-profile" [class.active]="isActive('/update-profile')">
+          Edit Profile
+        </a>
+      </li>
     </ul>
   </div>
 
-  <div class="links" style="text-align: left; margin-top: 20px; text-align: center;">
-    <p>Welcome, {{ username }}</p>
+  <!-- Welcome Message -->
+  <div class="links">
+    <p>Welcome, <strong>{{ username }}</strong></p>
   </div>
+
+  <!-- Account Details Section -->
+  <div class="account-details" *ngIf="accountDetails.length > 0; else noAccounts">
+    <h3>Your Accounts</h3>
+    <table class="account-table">
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let account of accountDetails">
+          <!-- <td>{{ account.accountNumber }}</td>
+          <td>{{ account.accountType }}</td>
+          <td>{{ account.balance | currency:account.currencyCode }}</td>
+          <td>{{ account.currencyCode }}</td>
+          <td>{{ account.status }}</td> -->
+          <td>
+            <a
+            [routerLink]="['/app-account-details', account.accountNumber]"
+            [class.active]="isActive('/app-account-details/' + account.accountNumber)"
+          >
+            {{ account.accountNumber }}
+          </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noAccounts>
+    <p class="error-message">{{ errorMessage }}</p>
+  </ng-template>
 </div>

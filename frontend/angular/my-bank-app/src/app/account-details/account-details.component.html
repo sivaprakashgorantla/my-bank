@@ -1,0 +1,30 @@
+<p>account-details works!</p>
+<table class="account-table">
+    <thead>
+      <tr>
+        <th>Account Number</th>
+        <th>Account Type</th>
+        <th>Account Balance</th>
+        <th>Amount CurrencyCode</th>
+        <th>Status</th>
+        <th>Transactins</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let account of accountDetails">
+         <td>{{ account.accountNumber }}</td>
+        <td>{{ account.accountType }}</td>
+        <td>{{ account.balance | currency:account.currencyCode }}</td>
+        <td>{{ account.currencyCode }}</td>
+        <td>{{ account.status }}</td> 
+        <td>
+            <a
+            [routerLink]="['/app-transactions', account.accountNumber]"
+            [class.active]="isActive('/app-transactions/' + account.accountNumber)"
+          >
+            {{ account.accountNumber }}
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>

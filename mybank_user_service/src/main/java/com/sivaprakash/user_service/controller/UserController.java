@@ -56,7 +56,8 @@ public class UserController {
                     userData.getUserId(), // You might want to store actual IDs
                     userData.getUsername(),
                     userData.getEmail(),
-                    userData.getRole()
+                    userData.getRole(),
+                    userData.getCustomerId()
 	
             );
             System.out.println("response :"+response);
@@ -89,26 +90,6 @@ public class UserController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-
-	// Login endpoint
-	@PostMapping(value = "/login")
-	public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
-		System.out.println("Login..................");
-//        String email = loginRequest.getEmail();
-//        String password = loginRequest.getPassword();
-
-		System.out.println("Login..................");
-		Optional<User> optionalUser = userService.login(email, password);
-		System.out.println("Login service " + email + " : " + password);
-		if (optionalUser.isPresent()) {
-			System.out.println("Login.................." + optionalUser.get());
-			return ResponseEntity.ok(optionalUser.get());
-		} else {
-			System.out.println("Controller Login..................Not found...");
-			return ResponseEntity.status(401).body("Invalid credentials");
-		}
-	}
-
 	// Update customer ID
 	@PutMapping("/{userId}")
 	public ResponseEntity<?> updateUserProfile(@RequestBody User updateUser) {
@@ -119,20 +100,18 @@ public class UserController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-//
-//	// update user profile based on user id
-//	@PutMapping("/{userId}")
-//	public ResponseEntity<?> updateUserProfile(@PathVariable Long userId, @RequestBody User user) {
-//		try {
-//			return ResponseEntity.ok(userService.updateUserProfile(userId, user));
-//		} catch (IllegalArgumentException e) {
-//			return ResponseEntity.badRequest().body(e.getMessage());
-//		}
-//
-//	}
-
 	// create a endpoint to get user by id and create a endpoint to delete user by
 	// id
+
+	@GetMapping("/customer/{userId}")
+	public ResponseEntity<?> getUserByCustomerId(@PathVariable String customerId) {
+		try {
+			return ResponseEntity.ok(userService.getUserByCustomerId(customerId));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
 	@GetMapping("/{userId}")
 	public ResponseEntity<?> getUserById(@PathVariable Long userId) {
 		try {

@@ -32,10 +32,10 @@ public class AuthController {
 
         try {
             UserResponseDTO user = userService.validateUser(loginRequest);
-
+            System.out.println("Auth UserResponseDTO :"+user);
             if(user != null) {
-                String token = jwtUtil.generateToken(user.getUsername(),user.getId());
-                return ResponseEntity.ok(new AuthResponseDTO(token));
+                String token = jwtUtil.generateToken(user.getUsername(),user.getId(),user.getCustomerId());
+                return ResponseEntity.ok(new AuthResponseDTO(token,user.getId(),user.getUsername(),user.getCustomerId()));
             }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -53,8 +53,8 @@ public class AuthController {
             UserResponseDTO user = userService.registerUser(registerRequest);
             System.out.println("Auth register : "+user);
             if(user != null) {
-                String token = jwtUtil.generateToken(user.getUsername(),user.getId());
-                return ResponseEntity.ok(new AuthResponseDTO(token));
+                String token = jwtUtil.generateToken(user.getUsername(),user.getId(),user.getCustomerId());
+                return ResponseEntity.ok(new AuthResponseDTO(token,user.getId(),user.getUsername(),user.getCustomerId()));
             }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

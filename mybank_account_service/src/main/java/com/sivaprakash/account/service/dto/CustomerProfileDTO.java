@@ -1,9 +1,9 @@
 package com.sivaprakash.account.service.dto;
 
 public class CustomerProfileDTO {
-	
+
 	private Long userId;
-	
+
 	private boolean isProfileComplete;
 
 	public CustomerProfileDTO(Long userId, boolean isProfileComplete) {

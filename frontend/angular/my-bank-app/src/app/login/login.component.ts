@@ -2,8 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpErrorResponse } from '@angular/common/http'; // Correct import
 import { Router } from '@angular/router';
+
+interface LoginResponse {
+  token: string;
+  userId: string;
+}
 
 @Component({
   selector: 'app-login',
@@ -13,7 +18,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-
   loginForm: FormGroup;
   loading = false;
   errorMessage = '';
@@ -24,7 +28,7 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]], // Updated form control
+      username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -34,23 +38,10 @@ export class LoginComponent {
       this.loading = true;
       this.errorMessage = '';
 
-      // Call the login method from AuthService
-      this.authService.login(this.loginForm.value.username, this.loginForm.value.password) // Updated to use username
-        .subscribe({
-          next: (response) => {
-            console.log('Login Response: ', response);
-            this.authService.saveToken(response.token);
-            this.router.navigate(['/dashboard']);
-          },
-          error: (error) => {
-            console.error('Login Error:', error);
-            this.errorMessage = 'Invalid credentials, please try again.';
-            this.loading = false;
-          },
-          complete: () => {
-            this.loading = false;
-          }
-        });
+      const credentials = this.loginForm.value;
+
+      this.authService.login(credentials);
+
     } else {
       this.errorMessage = 'Please fill in all fields correctly.';
     }

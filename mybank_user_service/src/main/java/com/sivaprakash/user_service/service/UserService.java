@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.repository.UserRepository;
 
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 @Service
 public class UserService {
 
@@ -101,7 +103,6 @@ public class UserService {
             User user = userRepository.findById(updateUser.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
             BeanUtils.copyProperties(updateUser, user);
-            user.setProfileUpdated("Y");
             System.out.println("updated user before save : "+user);
             return userRepository.save(user);
             
@@ -117,6 +118,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    public User getUserByCustomerId(String customerId) {
+        return userRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
     // update user profile based on user id
     public User updateUserProfile(Long userId, User user) {
         try {
@@ -128,7 +134,6 @@ public class UserService {
             existingUser.setPhoneNumber(user.getPhoneNumber());
             existingUser.setDateOfBirth(user.getDateOfBirth());
             existingUser.setAddress(user.getAddress());
-            existingUser.setProfileUpdated("Y");
             return userRepository.save(existingUser);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update user profile", e);

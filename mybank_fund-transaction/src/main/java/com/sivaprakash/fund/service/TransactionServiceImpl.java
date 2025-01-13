@@ -20,9 +20,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<TransactionDTO> getLastTenTransactions(String accountId) {
+	public List<TransactionDTO> getLastTenTransactions(String accountNumber) {
 		List<Transaction> transactions = transactionRepository
-				.findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(accountId, accountId);
+				.findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(accountNumber, accountNumber);
 		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
@@ -40,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
 		} else if (criteria.getEndDate() != null) {
 			transactions = transactionRepository.findByAccountAndDateTo(criteria.getAccountId(), criteria.getEndDate());
 		} else {
-			transactions = transactionRepository.findByFromAccountIdOrToAccountId(criteria.getAccountId(),
+			transactions = transactionRepository.findByFromAccountNumberOrToAccountNumber(criteria.getAccountId(),
 					criteria.getAccountId());
 		}
 
@@ -60,9 +60,9 @@ public class TransactionServiceImpl implements TransactionService {
 		// Set counterparty details based on transaction type
 		if (transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT
 				|| transaction.getTransactionType() == Transaction.TransactionType.TRANSFER) {
-			dto.setCounterpartyAccountId(transaction.getFromAccountId().toString());
+			dto.setCounterpartyAccountId(transaction.getFromAccountNumber().toString());
 		} else {
-			dto.setCounterpartyAccountId(transaction.getToAccountId().toString());
+			dto.setCounterpartyAccountId(transaction.getToAccountNumber().toString());
 		}
 
 		return dto;

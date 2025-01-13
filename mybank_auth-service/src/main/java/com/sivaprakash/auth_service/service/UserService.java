@@ -32,7 +32,7 @@ public class UserService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-
+		System.out.println("validateUser : "+userResponseDTO);
         return userResponseDTO;
     }
 

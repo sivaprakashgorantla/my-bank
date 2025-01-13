@@ -4,7 +4,7 @@ public class UserResponseDTO {
     private Long id;
     private String username;
     private String email;
-
+    private String customerId;
 
     public UserResponseDTO() {
     }
@@ -34,4 +34,21 @@ public class UserResponseDTO {
     public void setEmail(String email) {
         this.email = email;
     }
+
+	public String getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+
+	@Override
+	public String toString() {
+		return "UserResponseDTO [id=" + id + ", username=" + username + ", email=" + email + ", customerId="
+				+ customerId + "]";
+	}
+    
+	
+    
 }

@@ -31,11 +31,11 @@ public class TransactionController {
 	}
 	
     
-	@GetMapping("/account/{accountId}/recent")
+	@GetMapping("/{accountNumber}/recent")
     public ResponseEntity<TransactionResponseDTO> getRecentTransactions(
-            @PathVariable String accountId) {
+            @PathVariable String accountNumber) {
         System.out.println("getRecentTransactions-----------------------------------");
-        List<TransactionDTO> transactions = transactionService.getLastTenTransactions(accountId);
+        List<TransactionDTO> transactions = transactionService.getLastTenTransactions(accountNumber);
         
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setTransactions(transactions);

@@ -1,54 +1,59 @@
 <div class="profile-container">
-    <h2 style="background-color: #b63333; color: #f3f1f1; font-weight: bold; font-size: 24px; padding: 10px;">User Profile</h2>
-    <div class="profile-card">
-      <div class="profile-field">
-        <label>Username:</label>
-        <span>{{ username }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Email:</label>
-        <span>{{ email }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Phone Number:</label>
-        <span>{{ phoneNumber }}</span>
-      </div>
-      <div class="profile-field">
-        <label>First Name:</label>
-        <span>{{ firstName }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Last Name:</label>
-        <span>{{ lastName }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Date of Birth:</label>
-        <span>{{ dateOfBirth }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Address:</label>
-        <span>{{ address }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Customer ID:</label>
-        <span>{{ customerId }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Status:</label>
-        <span>{{ status }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Role:</label>
-        <span>{{ role }}</span>
-      </div>
-      <div class="profile-field">
-        <label>Profile Updated:</label>
-        <span>{{ profileUpdated }}</span>
-      </div>
-    </div>
-    <div class="update-profile-link">
-        <a routerLink="/update-profile" class="btn btn-primary" style="display: block; text-align: center;">Update Profile</a>
-    </div>
-    
-</div>
+  <!-- Dashboard Link at the Top Right -->
+  <div class="dashboard-link">
+    <a routerLink="/dashboard" class="btn btn-primary">Dashboard</a>
+  </div>
+
+  <h2 class="profile-title">User Profile</h2>
   
+  <div class="profile-card">
+    <div class="profile-field">
+      <label>Username:</label>
+      <span>{{ username }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Email:</label>
+      <span>{{ email }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Phone Number:</label>
+      <span>{{ phoneNumber }}</span>
+    </div>
+    <div class="profile-field">
+      <label>First Name:</label>
+      <span>{{ firstName }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Last Name:</label>
+      <span>{{ lastName }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Date of Birth:</label>
+      <span>{{ dateOfBirth }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Address:</label>
+      <span>{{ address }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Customer ID:</label>
+      <span>{{ customerId }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Status:</label>
+      <span>{{ status }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Role:</label>
+      <span>{{ role }}</span>
+    </div>
+    <div class="profile-field">
+      <label>Profile Updated:</label>
+      <span>{{ profileUpdated }}</span>
+    </div>
+  </div>
+
+  <div class="update-profile-link">
+    <a routerLink="/update-profile" class="btn btn-primary">Update Profile</a>
+  </div>
+</div>
