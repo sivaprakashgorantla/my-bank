@@ -1,0 +1,11 @@
+body {
+    background-color: silver; /* Apply silver background color */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    font-family: Arial, sans-serif; /* Optional: Set a consistent font */
+  }
+  
+  html {
+    height: 100%; /* Ensure the entire page is covered */
+  }
+  

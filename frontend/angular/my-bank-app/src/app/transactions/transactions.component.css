@@ -29,7 +29,7 @@ h2 {
 
 .table th {
   text-align: center; /* Center-align the header text */
-  background-color: #f8f9fa; /* Optional: Add background color for headers */
+  background-color: #c8d9e9; /* Optional: Add background color for headers */
 }
 
 .table td {
@@ -44,4 +44,14 @@ h2 {
 
 .table-container {
   margin: 0 20px; /* Add left and right margin to the entire table container */
+}
+body {
+  background-color: rgb(240, 140, 140); /* Apply silver background color */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  font-family: Arial, sans-serif; /* Optional: Set a consistent font */
+}
+
+html {
+  height: 100%; /* Ensure the entire page is covered */
 }

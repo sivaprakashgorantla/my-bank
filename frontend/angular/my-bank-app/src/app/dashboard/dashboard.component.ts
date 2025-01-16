@@ -17,14 +17,15 @@ export class DashboardComponent implements OnInit {
   accountDetails: AccountDetailsDTO[] = []; // Store account details
   errorMessage: string | null = null;
 
-  constructor(private router: Router, private accountService: AccountService) {}
+  constructor(private router: Router, private accountService: AccountService) { }
 
   ngOnInit(): void {
     // Fetch the logged-in user's username
     this.username = localStorage.getItem('username') || 'Guest';
 
     // Replace with dynamic user ID as needed
-    const customerId = localStorage.getItem('customerId') !;
+    
+    const customerId = localStorage.getItem('customerId')!;
     console.log('for fetchAccountDetails customerId ID:', customerId);
     if (customerId) {
       this.fetchAccountDetails(customerId);
@@ -42,7 +43,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchAccountDetails(customerId: string): void {
-    
+
     this.accountService.getAccountsByCustomerId(customerId).subscribe({
       next: (response) => {
         if (response.accounts) {

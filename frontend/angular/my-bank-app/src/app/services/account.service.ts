@@ -23,7 +23,7 @@ export interface AccountResponseDTO {
 export class AccountService {
   private baseUrl = 'http://localhost:7878/api/v1/accounts'; // Update with your backend URL
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAccountsByCustomerId(customerId: string): Observable<AccountResponseDTO> {
     // Retrieve the JWT token from localStorage

@@ -15,47 +15,46 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+	@Autowired
+	private JwtUtil jwtUtil;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
-    	
-    	System.out.println("doFilterInternal.....................................");
-        String requestURI = request.getRequestURI();
+		System.out.println("doFilterInternal.....................................");
+		String requestURI = request.getRequestURI();
 
-        // Skip filter for permitted endpoints
-        if (requestURI.startsWith("/api/v1/auth/") || requestURI.startsWith("/api/user/test")) {
+		// Skip filter for permitted endpoints
+		if (requestURI.startsWith("/api/v1/auth/") || requestURI.startsWith("/api/user/test")) {
 
-        	System.out.println("doFilterInternal... startsWith if ..................................");    
-        	filterChain.doFilter(request, response);
-            return;
-        }
+			System.out.println("doFilterInternal... startsWith if ..................................");
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        String authHeader = request.getHeader("Authorization");
+		String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No valid token provided");
-            return;
-        }
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No valid token provided");
+			return;
+		}
 
-        String jwt = authHeader.substring(7);
-        try {
-            String username = jwtUtil.extractUsername(jwt);
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                filterChain.doFilter(request, response);
-            }
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-        }
-    }
+		String jwt = authHeader.substring(7);
+		try {
+			String username = jwtUtil.extractUsername(jwt);
+			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null,
+						new ArrayList<>());
+				SecurityContextHolder.getContext().setAuthentication(authToken);
+				filterChain.doFilter(request, response);
+			}
+		} catch (Exception e) {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+		}
+	}
 }

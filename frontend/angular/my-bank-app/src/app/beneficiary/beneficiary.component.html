@@ -1,0 +1,42 @@
+<div class="beneficiary-container" style="background-color: rgb(230, 236, 243); padding: 20px; border-radius: 10px;">
+    <h2>Manage Beneficiaries</h2>
+
+    <!-- Beneficiaries Table -->
+    <div style="margin-top: 30px;">
+      <h3>Beneficiaries List</h3>
+      <div style="display: flex; flex-direction:row ;">
+        <a
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        [routerLink]="['/app-add-beneficiary']"
+      >
+        Add Beneficiary
+      </a>
+     </div> 
+      <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead style="background-color: #f3f3f3;">
+          <tr>
+            <th>Name</th>
+            <th>Account Number</th>
+            <th>Bank Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of beneficiaries">
+            <td>{{ b.beneficiaryName }}</td>
+            <td>{{ b.beneficiaryAccountNumber }}</td>
+            <td>{{ b.beneficiaryBankName }}</td>
+            <td>{{ b.beneficiaryEmail }}</td>
+            <td>{{ b.beneficiaryType }}</td>
+            <td>
+              <button (click)="editBeneficiary(b.beneficiaryId)">Edit</button>
+              <button (click)="deleteBeneficiary(b.beneficiaryId)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

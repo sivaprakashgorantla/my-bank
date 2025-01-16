@@ -19,8 +19,8 @@
         <td>{{ account.status }}</td> 
         <td>
             <a
-            [routerLink]="['/app-transactions', account.accountNumber]"
-            [class.active]="isActive('/app-transactions/' + account.accountNumber)"
+            [routerLink]="['/app-transaction-history', account.accountNumber]"
+            [class.active]="isActive('/app-transaction-history/' + account.accountNumber)"
           >
             {{ account.accountNumber }}
           </a>

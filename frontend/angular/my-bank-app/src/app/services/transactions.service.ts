@@ -19,7 +19,7 @@ export interface Transaction {
   providedIn: 'root'
 })
 export class TransactionsService {
-  private baseUrl = 'http://localhost:7878/api/v1/transactions'; // Update with your backend URL
+  private baseUrl = 'http://localhost:7878 /api/v1/transactions'; // Update with your backend URL
 
   constructor(private http: HttpClient) {}
 
