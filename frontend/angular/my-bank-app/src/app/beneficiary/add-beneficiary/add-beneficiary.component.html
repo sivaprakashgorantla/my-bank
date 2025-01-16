@@ -1,0 +1,75 @@
+<p>add-beneficiary works!</p>
+<form [formGroup]="beneficiaryForm" (ngSubmit)="onSubmit()">
+  
+    <!-- Beneficiary Name -->
+    <div>
+      <label for="beneficiaryName">Beneficiary Name</label>
+      <input id="beneficiaryName" formControlName="beneficiaryName" type="text" />
+      <div *ngIf="beneficiaryForm.get('beneficiaryName')?.invalid && beneficiaryForm.get('beneficiaryName')?.touched">
+        Beneficiary name is required.
+      </div>
+    </div>
+
+    <!-- Account Number -->
+    <div>
+      <label for="beneficiaryAccountNumber">Account Number</label>
+      <input id="beneficiaryAccountNumber" formControlName="beneficiaryAccountNumber" type="text" />
+      <div *ngIf="beneficiaryForm.get('beneficiaryAccountNumber')?.invalid && beneficiaryForm.get('beneficiaryAccountNumber')?.touched">
+        Account number is required.
+      </div>
+    </div>
+
+    <!-- Bank Code -->
+    <div>
+      <label for="beneficiaryBankCode">Bank Code</label>
+      <input id="beneficiaryBankCode" formControlName="beneficiaryBankCode" type="text" />
+      <div *ngIf="beneficiaryForm.get('beneficiaryBankCode')?.invalid && beneficiaryForm.get('beneficiaryBankCode')?.touched">
+        Bank code is required.
+      </div>
+    </div>
+
+    <!-- Bank Name -->
+    <div>
+      <label for="beneficiaryBankName">Bank Name</label>
+      <input id="beneficiaryBankName" formControlName="beneficiaryBankName" type="text" />
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="beneficiaryEmail">Email</label>
+      <input id="beneficiaryEmail" formControlName="beneficiaryEmail" type="email" />
+      <div *ngIf="beneficiaryForm.get('beneficiaryEmail')?.invalid && beneficiaryForm.get('beneficiaryEmail')?.touched">
+        Please enter a valid email address.
+      </div>
+    </div>
+
+    <!-- Beneficiary Type -->
+    <div>
+      <label for="beneficiaryType">Beneficiary Type</label>
+      <select id="beneficiaryType" formControlName="beneficiaryType">
+        <option value="INTERNAL">Internal</option>
+        <option value="EXTERNAL">External</option>
+      </select>
+    </div>
+
+    <!-- Relationship -->
+    <div>
+      <label for="relationship">Relationship</label>
+      <input id="relationship" formControlName="relationship" type="text" />
+    </div>
+
+    <!-- Daily Transfer Limit -->
+    <div>
+      <label for="dailyTransferLimit">Daily Transfer Limit</label>
+      <input id="dailyTransferLimit" formControlName="dailyTransferLimit" type="number" />
+      <div *ngIf="beneficiaryForm.get('dailyTransferLimit')?.invalid && beneficiaryForm.get('dailyTransferLimit')?.touched">
+        Please enter a valid daily transfer limit.
+      </div>
+    </div>
+
+    <!-- Submit and Reset Buttons -->
+    <div style="margin-top: 20px;">
+      <button type="submit" [disabled]="beneficiaryForm.invalid">Save Beneficiary</button>
+      <button type="button" (click)="resetForm()">Reset</button>
+    </div>
+  </form>
