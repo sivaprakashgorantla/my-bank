@@ -11,8 +11,13 @@ import com.sivaprakash.beneficiary.entity.Beneficiary;
 
 @Repository
 public interface BeneficiaryRepository extends JpaRepository<Beneficiary, Long> {
-	@Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Beneficiary b WHERE b.beneficiaryAccountNumber = :accountNumber")
-	boolean existsByBeneficiaryAccountNumber(@Param("accountNumber") String accountNumber);
 
-	List<Beneficiary> findByUserId(Long userId);
+    boolean existsByBeneficiaryId(Long beneficiaryId);
+
+    @Query("SELECT b FROM Beneficiary b WHERE b.userId = :userId")
+    List<Beneficiary> findByUserId(@Param("userId") Long userId);
+
+    // Fix the query for checking the account number
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Beneficiary b WHERE b.beneficiaryAccountNumber = :accountNumber")
+    boolean existsByBeneficiaryAccountNumber(@Param("accountNumber") String accountNumber);
 }

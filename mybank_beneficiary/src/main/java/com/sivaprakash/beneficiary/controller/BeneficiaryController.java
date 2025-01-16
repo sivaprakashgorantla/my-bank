@@ -46,8 +46,7 @@ public class BeneficiaryController {
 			List<BeneficiaryResponseDTO> beneficiaries = beneficiaryService.getAllBeneficiaries();
 			return ResponseEntity.ok(beneficiaries);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(List.of(new BeneficiaryResponseDTO(null, null, null, null, null,
-					"ERROR", null, "Failed to retrieve beneficiaries")));
+			return ResponseEntity.badRequest().body(List.of(new BeneficiaryResponseDTO("ERROR", "Failed to retrieve beneficiaries")));
 		}
 	}
 	
@@ -58,8 +57,7 @@ public class BeneficiaryController {
 			List<BeneficiaryResponseDTO> beneficiaries = beneficiaryService.getBeneficiariesByUserId(userId);
 			return ResponseEntity.ok(beneficiaries);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(List.of(new BeneficiaryResponseDTO(null, null, null, null, null,
-					"ERROR", null, "Failed to retrieve beneficiaries")));
+			return ResponseEntity.badRequest().body(List.of(new BeneficiaryResponseDTO("ERROR", "Failed to retrieve beneficiaries")));
 		}
 	}
 	@DeleteMapping("/{beneficiaryId}")

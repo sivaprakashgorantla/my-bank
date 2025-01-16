@@ -11,117 +11,84 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sivaprakash.beneficiary.dto.BeneficiaryRequestDTO;
 import com.sivaprakash.beneficiary.dto.BeneficiaryResponseDTO;
 import com.sivaprakash.beneficiary.entity.Beneficiary;
+import com.sivaprakash.beneficiary.entity.Beneficiary.BeneficiaryStatus;
+import com.sivaprakash.beneficiary.entity.Beneficiary.BeneficiaryType;
+import com.sivaprakash.beneficiary.entity.BeneficiaryId;
 import com.sivaprakash.beneficiary.repository.BeneficiaryRepository;
 
 @Service
 public class BeneficiaryServiceImpl implements BeneficiaryService {
 
-	@Autowired
+    @Autowired
     private BeneficiaryRepository beneficiaryRepository;
 
     @Override
     @Transactional
     public BeneficiaryResponseDTO addBeneficiary(BeneficiaryRequestDTO request) {
+        // Create BeneficiaryId
         // Validate if beneficiary already exists
-        if (beneficiaryRepository.existsByBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber())) {
-            throw new IllegalArgumentException("Beneficiary with this account number already exists");
+        if (beneficiaryRepository.existsByBeneficiaryId(request.getBeneficiaryId())) {
+            throw new IllegalArgumentException("Beneficiary with this account number and bank code already exists");
         }
 
-        // Create new beneficiary
+        // Create new Beneficiary entity
         Beneficiary beneficiary = new Beneficiary();
-        //setting temp values 
-        beneficiary.setUserId(10000L);
-        beneficiary.setBeneficiaryBankName(request.getBeneficiaryBankName());
-        beneficiary.setRelationship(request.getRelationship());
+        //beneficiary.setBeneficiaryId(request.getBeneficiaryId());
         beneficiary.setBeneficiaryName(request.getBeneficiaryName());
-        beneficiary.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
-        beneficiary.setBeneficiaryBankCode(request.getBeneficiaryBankCode());
+        beneficiary.setBeneficiaryBankName(request.getBeneficiaryBankName());
         beneficiary.setBeneficiaryEmail(request.getBeneficiaryEmail());
-        //beneficiary.setAccountId(request.getAccountId());
-        beneficiary.setBeneficiaryType(Beneficiary.BeneficiaryType.EXTERNAL); // Default to external
-        beneficiary.setStatus(Beneficiary.BeneficiaryStatus.ACTIVE);
+        beneficiary.setBeneficiaryType(BeneficiaryType.EXTERNAL); // Default type
+        beneficiary.setRelationship(request.getRelationship());
+        beneficiary.setStatus(BeneficiaryStatus.ACTIVE);
 
-        try {
-			// Save beneficiary
-			beneficiary = beneficiaryRepository.save(beneficiary);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        // Save the entity
+        beneficiary = beneficiaryRepository.save(beneficiary);
 
-        // Create response
+        // Return response DTO
+        return convertToDTO(beneficiary, "Beneficiary added successfully");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BeneficiaryResponseDTO> getAllBeneficiaries() {
+        List<Beneficiary> beneficiaries = beneficiaryRepository.findAll();
+        return beneficiaries.stream()
+                .map(b -> convertToDTO(b, "Retrieved successfully"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BeneficiaryResponseDTO> getBeneficiariesByUserId(Long userId) {
+        List<Beneficiary> beneficiaries = beneficiaryRepository.findByUserId(userId);
+        return beneficiaries.stream()
+                .map(b -> convertToDTO(b, "Retrieved successfully"))
+                .collect(Collectors.toList());
+    }
+
+    private BeneficiaryResponseDTO convertToDTO(Beneficiary beneficiary, String message) {
         BeneficiaryResponseDTO response = new BeneficiaryResponseDTO();
         response.setBeneficiaryId(beneficiary.getBeneficiaryId());
-        response.setBeneficiaryName(beneficiary.getBeneficiaryName());
+        response.setUserId(beneficiary.getUserId());
         response.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
         response.setBeneficiaryBankCode(beneficiary.getBeneficiaryBankCode());
+        response.setBeneficiaryBankName(beneficiary.getBeneficiaryBankName());
         response.setBeneficiaryEmail(beneficiary.getBeneficiaryEmail());
+        response.setBeneficiaryName(beneficiary.getBeneficiaryName());
         response.setStatus(beneficiary.getStatus().name());
         response.setReferenceNumber(generateReferenceNumber());
-        response.setMessage("Beneficiary added successfully");
-
+        response.setMessage(message);
         return response;
     }
 
     private String generateReferenceNumber() {
         return "BEN" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<BeneficiaryResponseDTO> getAllBeneficiaries() {
-        
-    	List<Beneficiary> beneficiaries = null;
-		try {
-			beneficiaries = beneficiaryRepository.findAll();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-        // Map entities to DTOs
-        return beneficiaries.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private BeneficiaryResponseDTO convertToDTO(Beneficiary beneficiary) {
-        BeneficiaryResponseDTO response = new BeneficiaryResponseDTO();
-        response.setBeneficiaryId(beneficiary.getBeneficiaryId());
-        response.setBeneficiaryName(beneficiary.getBeneficiaryName());
-        response.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
-        response.setBeneficiaryBankCode(beneficiary.getBeneficiaryBankCode());
-        response.setBeneficiaryEmail(beneficiary.getBeneficiaryEmail());
-        response.setStatus(beneficiary.getStatus().name());
-        response.setReferenceNumber(generateReferenceNumber()); // Optional
-        response.setMessage("Retrieved successfully");
-        return response;
-    }
-
-	@Override
-	public List<BeneficiaryResponseDTO> getBeneficiariesByUserId(Long userId) {
-		// TODO Auto-generated method stub
-		System.out.println("getBeneficiariesByUserId........................");
-    	List<Beneficiary> beneficiaries = null;
-		try {
-			beneficiaries = beneficiaryRepository.findByUserId(userId);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        // Map entities to DTOs
-        return beneficiaries.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-	}
-
-	
-	public void deleteBeneficiaryById(Long beneficiaryId) {
+    public void deleteBeneficiaryById(Long beneficiaryId) {
 	    Beneficiary beneficiary = beneficiaryRepository.findById(beneficiaryId)
 	            .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found with ID: " + beneficiaryId));
 	    beneficiaryRepository.delete(beneficiary);
 	}
 
-	
 }

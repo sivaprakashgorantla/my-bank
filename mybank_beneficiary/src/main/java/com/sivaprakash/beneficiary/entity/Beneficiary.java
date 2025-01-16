@@ -5,96 +5,92 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "beneficiaries")
+@Table(name = "beneficiaries", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id",
+		"beneficiary_account_number", "beneficiary_bank_code" }))
 public class Beneficiary {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "beneficiary_id_seq")
-    @SequenceGenerator(name = "beneficiary_id_seq", sequenceName = "beneficiary_id_seq", allocationSize = 1)
-    private Long beneficiaryId;
 
-    @Column(name = "userId", nullable = false)
-    private Long userId;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "beneficiary_seq")
+	@SequenceGenerator(name = "beneficiary_seq", sequenceName = "beneficiary_seq", allocationSize = 1)
+	@Column(name = "beneficiary_id")
+	private Long beneficiaryId;
 
-    @Column(name = "beneficiary_name", nullable = false, length = 100)
-    private String beneficiaryName;
+	@Column(name = "user_id", nullable = false)
+	private Long userId;
 
-    @Column(name = "beneficiary_account_number", nullable = false, length = 20)
-    private String beneficiaryAccountNumber;
+	@Column(name = "beneficiary_account_number", nullable = false)
+	private String beneficiaryAccountNumber;
 
-    @Column(name = "beneficiary_bank_code", length = 20)
-    private String beneficiaryBankCode;
+	@Column(name = "beneficiary_bank_code", nullable = false)
+	private String beneficiaryBankCode;
 
-    @Column(name = "beneficiary_bank_name", length = 100)
-    private String beneficiaryBankName;
+	@Column(name = "beneficiary_name", nullable = false, length = 100)
+	private String beneficiaryName;
 
-    @Column(name = "beneficiary_email")
-    private String beneficiaryEmail;
+	@Column(name = "beneficiary_bank_name", length = 100)
+	private String beneficiaryBankName;
 
-    @Column(name = "beneficiary_type", length = 20)
-    @Enumerated(EnumType.STRING)
-    private BeneficiaryType beneficiaryType;
+	@Column(name = "beneficiary_email")
+	private String beneficiaryEmail;
 
-    @Column(length = 50)
-    private String relationship;
+	@Column(name = "beneficiary_type", length = 20)
+	@Enumerated(EnumType.STRING)
+	private BeneficiaryType beneficiaryType;
 
-    @Column(length = 20)
-    @Enumerated(EnumType.STRING)
-    private BeneficiaryStatus status = BeneficiaryStatus.ACTIVE;
+	@Column(length = 50)
+	private String relationship;
 
-    @Column(name = "daily_transfer_limit", precision = 15, scale = 2)
-    private BigDecimal dailyTransferLimit;
+	@Column(length = 20)
+	@Enumerated(EnumType.STRING)
+	private BeneficiaryStatus status = BeneficiaryStatus.ACTIVE;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@Column(name = "daily_transfer_limit", precision = 15, scale = 2)
+	private BigDecimal dailyTransferLimit;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
-    @Column(name = "last_transfer_date")
-    private LocalDateTime lastTransferDate;
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+	@Column(name = "last_transfer_date")
+	private LocalDateTime lastTransferDate;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    
-    public Beneficiary() {
-		super();
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
 	}
 
-
-
-	public Beneficiary(Long beneficiaryId, Long userId, String beneficiaryName, String beneficiaryAccountNumber,
-			String beneficiaryBankCode, String beneficiaryBankName, String beneficiaryEmail,
-			BeneficiaryType beneficiaryType, String relationship, BeneficiaryStatus status,
-			BigDecimal dailyTransferLimit, LocalDateTime createdAt, LocalDateTime updatedAt,
-			LocalDateTime lastTransferDate) {
-		super();
-		this.beneficiaryId = beneficiaryId;
-		this.userId = userId;
-		this.beneficiaryName = beneficiaryName;
-		this.beneficiaryAccountNumber = beneficiaryAccountNumber;
-		this.beneficiaryBankCode = beneficiaryBankCode;
-		this.beneficiaryBankName = beneficiaryBankName;
-		this.beneficiaryEmail = beneficiaryEmail;
-		this.beneficiaryType = beneficiaryType;
-		this.relationship = relationship;
-		this.status = status;
-		this.dailyTransferLimit = dailyTransferLimit;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.lastTransferDate = lastTransferDate;
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
 	}
 
-
-
+	// Default constructor
+	public Beneficiary() {
+	}
+	 // Constructor with fields and LocalDateTime parameters
+    public Beneficiary(Long userId, String beneficiaryAccountNumber, String beneficiaryBankCode, String beneficiaryName,
+                       String beneficiaryBankName, String beneficiaryEmail, BeneficiaryType beneficiaryType, String relationship,
+                       BeneficiaryStatus status, BigDecimal dailyTransferLimit, LocalDateTime createdAt, LocalDateTime updatedAt,
+                       LocalDateTime lastTransferDate) {
+        this.userId = userId;
+        this.beneficiaryAccountNumber = beneficiaryAccountNumber;
+        this.beneficiaryBankCode = beneficiaryBankCode;
+        this.beneficiaryName = beneficiaryName;
+        this.beneficiaryBankName = beneficiaryBankName;
+        this.beneficiaryEmail = beneficiaryEmail;
+        this.beneficiaryType = beneficiaryType;
+        this.relationship = relationship;
+        this.status = status;
+        this.dailyTransferLimit = dailyTransferLimit;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastTransferDate = lastTransferDate;
+    }
+	// Getters and Setters
 	public Long getBeneficiaryId() {
 		return beneficiaryId;
 	}
@@ -111,14 +107,6 @@ public class Beneficiary {
 		this.userId = userId;
 	}
 
-	public String getBeneficiaryName() {
-		return beneficiaryName;
-	}
-
-	public void setBeneficiaryName(String beneficiaryName) {
-		this.beneficiaryName = beneficiaryName;
-	}
-
 	public String getBeneficiaryAccountNumber() {
 		return beneficiaryAccountNumber;
 	}
@@ -133,6 +121,14 @@ public class Beneficiary {
 
 	public void setBeneficiaryBankCode(String beneficiaryBankCode) {
 		this.beneficiaryBankCode = beneficiaryBankCode;
+	}
+
+	public String getBeneficiaryName() {
+		return beneficiaryName;
+	}
+
+	public void setBeneficiaryName(String beneficiaryName) {
+		this.beneficiaryName = beneficiaryName;
 	}
 
 	public String getBeneficiaryBankName() {
@@ -207,13 +203,11 @@ public class Beneficiary {
 		this.lastTransferDate = lastTransferDate;
 	}
 
-
-
 	public enum BeneficiaryType {
-        INTERNAL, EXTERNAL
-    }
+		INTERNAL, EXTERNAL
+	}
 
-    public enum BeneficiaryStatus {
-        ACTIVE, INACTIVE, SUSPENDED
-    }
+	public enum BeneficiaryStatus {
+		ACTIVE, INACTIVE, SUSPENDED
+	}
 }
