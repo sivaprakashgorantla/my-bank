@@ -51,10 +51,24 @@ export class BeneficiaryService {
     return this.http.post<any>(`${this.baseUrl}addBeneficiary`, beneficiary, { headers });
   }
 
-  // Update a beneficiary
-  updateBeneficiary(beneficiary: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/${beneficiary.beneficiaryId}`, beneficiary);
+  updateBeneficiary(beneficiaryId: number, beneficiary: any): Observable<any> {
+    console.log('deleteBeneficiary :', beneficiaryId);
+    const token = localStorage.getItem('auth-token');
+    console.log('Token in getAccountsByAccountNumber:', token);
+    console.log('accountNumber in getAccountsByAccountNumber:');
+
+    if (!token) {
+      console.error('JWT token is not available in localStorage');
+      throw new Error('User is not authenticated');
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.put<any>(`${this.baseUrl}/beneficiaries/${beneficiaryId}`, beneficiary);
   }
+
 
   // Delete a beneficiary
   deleteBeneficiary(beneficiaryId: number): Observable<string> {
@@ -71,13 +85,12 @@ export class BeneficiaryService {
     // Add the Authorization header
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
-
     });
-
 
     return this.http.delete(`${this.baseUrl}${beneficiaryId}`, {
       headers,
       responseType: 'text', // Specify the response type as 'text'
     });
   }
+
 }

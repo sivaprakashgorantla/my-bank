@@ -1,34 +1,29 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { BeneficiaryService } from '../services/beneficiary.service';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { CommonModule, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-beneficiary',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [RouterLink, CommonModule],  // Add this import
   templateUrl: './beneficiary.component.html',
   styleUrls: ['./beneficiary.component.css'],
   providers: [BeneficiaryService]
 })
 export class BeneficiaryComponent implements OnInit {
-  resetForm() {
-    throw new Error('Method not implemented.');
-  }
   beneficiaries: any[] = [];
 
-  constructor(private beneficiaryService: BeneficiaryService, private fb: FormBuilder) {
-  }
+  constructor(
+    private beneficiaryService: BeneficiaryService,
+    private router: Router
+  ) { }
+
   ngOnInit() {
     this.loadBeneficiaries();
-    console.log('Beneficiaries:', this.beneficiaries);
   }
 
-
   loadBeneficiaries() {
-    console.log('Loading beneficiaries...');
     this.beneficiaryService.getBeneficiaries().subscribe(
       (data) => (this.beneficiaries = data),
       (error) => console.error('Error loading beneficiaries', error)
@@ -36,17 +31,20 @@ export class BeneficiaryComponent implements OnInit {
   }
 
   editBeneficiary(b: any) {
-    //    this.beneficiary = { ...b }; // Load data for editing
+    // Navigate to edit page, passing the beneficiary ID
+    console.log('Editing beneficiary:', b);
+    if (b && b.beneficiaryId) {
+      this.router.navigate(['/app-update-beneficiary', b.beneficiaryId]);
+    } else {
+      console.error('Beneficiary ID is missing');
+    }
   }
 
   deleteBeneficiary(b: any) {
     if (confirm('Are you sure you want to delete this beneficiary?')) {
-      this.beneficiaryService.deleteBeneficiary(b).subscribe(
-        {
-          next: x => { this.loadBeneficiaries() },
-          // () => this.loadBeneficiaries(),
-          error: er => console.error('Error deleting beneficiary', er)
-        }
+      this.beneficiaryService.deleteBeneficiary(b.beneficiaryId).subscribe(
+        () => this.loadBeneficiaries(),
+        (error) => console.error('Error deleting beneficiary', error)
       );
     }
   }

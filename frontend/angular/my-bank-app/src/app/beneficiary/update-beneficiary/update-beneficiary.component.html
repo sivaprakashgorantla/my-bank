@@ -1,0 +1,99 @@
+<div
+  class="beneficiary-container"
+  style="max-width: 600px; margin: 50px auto; padding: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+>
+  <h2
+    style="text-align: center; font-size: 24px; margin-bottom: 20px; color: #333;"
+  >
+    Edit Beneficiary
+  </h2>
+
+  <form
+    [formGroup]="beneficiaryForm"
+    style="display: flex; flex-direction: column; gap: 15px;"
+  >
+    <!-- Name -->
+    <div style="display: flex; flex-direction: column;">
+      <label
+        for="beneficiaryName"
+        style="font-weight: 500; color: #555; margin-bottom: 5px;"
+        >Name</label
+      >
+      <input
+        id="beneficiaryName"
+        formControlName="beneficiaryName"
+        [readonly]="true"
+        style="padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; color: #333;"
+      />
+    </div>
+
+    <!-- Account Number -->
+    <div style="display: flex; flex-direction: column;">
+      <label
+        for="beneficiaryAccountNumber"
+        style="font-weight: 500; color: #555; margin-bottom: 5px;"
+        >Account Number</label
+      >
+      <input
+        id="beneficiaryAccountNumber"
+        formControlName="beneficiaryAccountNumber"
+        [readonly]="true"
+        style="padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; color: #333;"
+      />
+    </div>
+
+    <!-- Bank Name -->
+    <div style="display: flex; flex-direction: column;">
+      <label
+        for="beneficiaryBankName"
+        style="font-weight: 500; color: #555; margin-bottom: 5px;"
+        >Bank Name</label
+      >
+      <input
+        id="beneficiaryBankName"
+        formControlName="beneficiaryBankName"
+        [readonly]="true"
+        style="padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; color: #333;"
+      />
+    </div>
+
+    <!-- Email -->
+    <div style="display: flex; flex-direction: column;">
+      <label
+        for="beneficiaryEmail"
+        style="font-weight: 500; color: #555; margin-bottom: 5px;"
+        >Email</label
+      >
+      <input
+        id="beneficiaryEmail"
+        formControlName="beneficiaryEmail"
+        style="padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; background-color: #ffffff; color: #333;"
+      />
+    </div>
+
+    <!-- Type -->
+    <div style="display: flex; flex-direction: column;">
+      <label
+        for="beneficiaryType"
+        style="font-weight: 500; color: #555; margin-bottom: 5px;"
+        >Type</label
+      >
+      <input
+        id="beneficiaryType"
+        formControlName="beneficiaryType"
+        [readonly]="true"
+        style="padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; color: #333;"
+      />
+    </div>
+
+    <!-- Save Button -->
+    <button
+      type="submit"
+      [disabled]="beneficiaryForm.invalid"
+      style="padding: 12px 20px; font-size: 16px; font-weight: bold; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;"
+      [ngStyle]="{ 'background-color': beneficiaryForm.invalid ? '#a0d4ff' : '#007bff' }"
+    >
+      Save
+    </button>
+  </form>
+</div>

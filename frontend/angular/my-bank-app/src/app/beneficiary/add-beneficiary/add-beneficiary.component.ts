@@ -66,7 +66,7 @@ export class AddBeneficiaryComponent implements OnInit {
     
       if (this.beneficiary.beneficiaryId) {
         // Update existing beneficiary
-        this.beneficiaryService.updateBeneficiary(this.beneficiary).subscribe(
+        this.beneficiaryService.updateBeneficiary(this.beneficiary.beneficiaryId, this.beneficiary).subscribe(
           () => {
             this.loadBeneficiaries();
             this.beneficiary = this.resetBeneficiary();
