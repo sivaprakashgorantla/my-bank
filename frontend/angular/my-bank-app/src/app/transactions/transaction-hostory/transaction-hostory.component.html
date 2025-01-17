@@ -1,4 +1,4 @@
-<p>transaction-history works!</p>
+<p>transaction-hostory works!</p>
 <div class="container mt-4">
     <h2>Recent Transactions</h2>
     <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -24,7 +24,7 @@
             <td>{{ transaction.transactionType }}</td>
             <td>{{ transaction.counterpartyBank }}</td>
             <td>{{ transaction.counterpartyAccountId }}</td>
-            <td>{{ transaction.transactionDate | date:'medium' }}</td>
+            <td>{{ transaction.transactionDate | date: 'medium' }}</td>
             <td>{{ transaction.amount | currency: transaction.currencyCode }}</td>
             <td>{{ transaction.currencyCode }}</td>
             <td>

@@ -8,12 +8,18 @@
     </button>
     <ul class="dropdown-menu" *ngIf="showProfileMenu">
       <li>
-        <a routerLink="/view-profile" [class.active]="isActive('/view-profile')">
+        <a
+          routerLink="/view-profile"
+          [class.active]="isActive('/view-profile')"
+        >
           View Profile
         </a>
       </li>
       <li>
-        <a routerLink="/update-profile" [class.active]="isActive('/update-profile')">
+        <a
+          routerLink="/update-profile"
+          [class.active]="isActive('/update-profile')"
+        >
           Edit Profile
         </a>
       </li>
@@ -22,35 +28,48 @@
 
   <!-- Welcome Message -->
   <div class="links">
-    <p>Welcome, <strong>{{ username }}</strong></p>
+    <p>
+      Welcome, <strong>{{ username }}</strong>
+    </p>
   </div>
-<div style="display: flex; flex-direction:row ;">
-  <button
-  class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-  [routerLink]="['/app-beneficiary']"
->
-  Beneficiary
-</button>
-</div>
+  <div style="display: flex; flex-direction: row">
+    <button
+      class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+      [routerLink]="['/app-beneficiary']"
+    >
+      <a
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        [routerLink]="['/app-transaction']"
+      >
+        Fund Transfer
+      </a>
+
+      Beneficiary
+    </button>
+  </div>
   <!-- Account Details Section -->
-  <div class="account-details" *ngIf="accountDetails.length > 0; else noAccounts">
+  <div
+    class="account-details"
+    *ngIf="accountDetails.length > 0; else noAccounts"
+  >
     <h3>Your Accounts</h3>
     <table class="account-table">
       <thead>
         <tr>
           <th>Account Number</th>
-          
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let account of accountDetails">
           <td>
             <a
-            [routerLink]="['/app-account-details', account.accountNumber]"
-            [class.active]="isActive('/app-account-details/' + account.accountNumber)"
-          >
-            {{ account.accountNumber }}
-          </a>
+              [routerLink]="['/app-account-details', account.accountNumber]"
+              [class.active]="
+                isActive('/app-account-details/' + account.accountNumber)
+              "
+            >
+              {{ account.accountNumber }}
+            </a>
           </td>
         </tr>
       </tbody>

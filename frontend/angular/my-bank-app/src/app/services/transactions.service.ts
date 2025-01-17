@@ -19,15 +19,15 @@ export interface Transaction {
   providedIn: 'root'
 })
 export class TransactionsService {
-  private baseUrl = 'http://localhost:7878 /api/v1/transactions'; // Update with your backend URL
+  private baseUrl = 'http://localhost:7878/api/v1/transactions'; // Update with your backend URL
 
   constructor(private http: HttpClient) {}
 
-  getAccountsByAccountNumber(accountNumber: string): Observable<any> {
+  getTransactionsByAccountNumber(accountNumber: string): Observable<any> {
     // Retrieve the JWT token from localStorage
     const token = localStorage.getItem('auth-token');
-    console.log('Token in getAccountsByAccountNumber:', token); // Debugging token retrieval
-    console.log('accountNumber in getAccountsByAccountNumber:', accountNumber); // Debugging userId retrieval
+    console.log('Token in getTransactionsByAccountNumber:', token); // Debugging token retrieval
+    console.log('accountNumber in getTransactionsByAccountNumber:', accountNumber); // Debugging userId retrieval
 
     if (!token) {
       console.error('JWT token is not available in localStorage');
