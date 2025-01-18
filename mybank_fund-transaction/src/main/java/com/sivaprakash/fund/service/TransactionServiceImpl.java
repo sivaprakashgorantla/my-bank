@@ -67,4 +67,35 @@ public class TransactionServiceImpl implements TransactionService {
 
 		return dto;
 	}
-}
+
+	@Override
+	@Transactional
+    public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction) {
+        try {
+            // Save the debit transaction (fromTransaction)
+            fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+            transactionRepository.save(fromTransaction);
+
+            // Save the credit transaction (toTransaction)
+            toTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+            transactionRepository.save(toTransaction);
+
+            // TODO: Update account balances in AccountService
+            // Example:
+            // accountService.debitAmount(fromTransaction.getFromAccountNumber(), fromTransaction.getAmount());
+            // accountService.creditAmount(toTransaction.getToAccountNumber(), toTransaction.getAmount());
+
+            return true;
+        } catch (Exception e) {
+            // Log the error
+            e.printStackTrace();
+
+            // If any error occurs, set both transactions as FAILED and save them
+            fromTransaction.setStatus(Transaction.TransactionStatus.FAILED);
+            toTransaction.setStatus(Transaction.TransactionStatus.FAILED);
+            transactionRepository.save(fromTransaction);
+            transactionRepository.save(toTransaction);
+
+            return false;
+        }
+    }}

@@ -12,27 +12,29 @@ interface JwtPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private authApiUrl = 'http://localhost:7878/api/v1/auth/'; // Replace with your API URL
   private userApiUrl = 'http://localhost:7878/api/v1/users/'; // Replace with your API URL
   private tokenKey = 'auth-token'; // Store the JWT token in local storage
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {}
 
   // Login method
   login(credentials: any): void {
-    this.http.post('http://localhost:7878/api/v1/auth/login', credentials).subscribe((response: any) => {
-        const { token, userId ,username,customerId} = response;
+    this.http
+      .post('http://localhost:7878/api/v1/auth/login', credentials)
+      .subscribe((response: any) => {
+        const { token, userId, username, customerId } = response;
         this.saveToken(token);
-        
+
         localStorage.setItem('userId', userId);
         localStorage.setItem('username', username);
         localStorage.setItem('customerId', customerId);
         this.router.navigate(['/dashboard']);
-    });
-}
+      });
+  }
 
   // login(username: string, password: string): Observable<any> {
   //   const loginPayload = { username, password };
@@ -49,7 +51,6 @@ export class AuthService {
     email: string,
     phoneNumber: string,
     password: string
-
   ): Observable<any> {
     const registerPayload = {
       username,
@@ -57,11 +58,11 @@ export class AuthService {
       lastName,
       email,
       phoneNumber,
-      password
+      password,
     };
-    return this.http.post<any>(`${this.authApiUrl}register`, registerPayload).pipe(
-      catchError((error) => this.handleError(error))
-    );
+    return this.http
+      .post<any>(`${this.authApiUrl}register`, registerPayload)
+      .pipe(catchError((error) => this.handleError(error)));
   }
 
   getUserProfile(): Observable<any> {
@@ -75,9 +76,9 @@ export class AuthService {
     }
 
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}` // Add the Authorization header
+      Authorization: `Bearer ${token}`, // Add the Authorization header
     });
-    return this.http.get<any>(`${this.userApiUrl}85`,{headers});
+    return this.http.get<any>(`${this.userApiUrl}85`, { headers });
   }
 
   updateUserProfile(profile: any): Observable<any> {
@@ -85,7 +86,6 @@ export class AuthService {
     const userId = localStorage.getItem('userId');
     return this.http.put<any>(`${this.userApiUrl}/${userId}`, profile);
   }
-
 
   // Save the JWT token to local storage
   saveToken(token: string): void {
@@ -123,12 +123,14 @@ export class AuthService {
   private handleError(error: any): Observable<never> {
     console.error('AuthService Error:', error);
 
-    let errorMessage = 'An error occurred during authentication. Please try again later.';
+    let errorMessage =
+      'An error occurred during authentication. Please try again later.';
 
     if (error.status === 0) {
       errorMessage = 'Network error. Please check your internet connection.';
     } else if (error.status === 401) {
-      errorMessage = 'Invalid credentials. Please check your email and password.';
+      errorMessage =
+        'Invalid credentials. Please check your email and password.';
     } else if (error.status === 400) {
       errorMessage = 'Invalid input. Please check the registration details.';
     }
@@ -136,5 +138,4 @@ export class AuthService {
     alert(errorMessage);
     return throwError(errorMessage); // Return an observable with the error message
   }
-
 }

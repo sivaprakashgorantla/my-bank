@@ -32,21 +32,24 @@
       Welcome, <strong>{{ username }}</strong>
     </p>
   </div>
-  <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; gap: 10px;">
+    <!-- Fund Transfer Button -->
+    <button
+      class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+      [routerLink]="['/app-transaction']"
+    >
+      Fund Transfer
+    </button>
+  
+    <!-- Beneficiary Button -->
     <button
       class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
       [routerLink]="['/app-beneficiary']"
     >
-      <a
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        [routerLink]="['/app-transaction']"
-      >
-        Fund Transfer
-      </a>
-
       Beneficiary
     </button>
   </div>
+  
   <!-- Account Details Section -->
   <div
     class="account-details"

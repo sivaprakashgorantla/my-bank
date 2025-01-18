@@ -18,6 +18,8 @@ export interface Transaction {
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class TransactionsService {
   private baseUrl = 'http://localhost:7878/api/v1/transactions'; // Update with your backend URL
 
@@ -44,4 +46,33 @@ export class TransactionsService {
       headers,
     });
   }
+
+  makeTransactions(selectedAccount:string,transferAmount:number,beneficiaryAccountNumber:string): Observable<any> {
+    // Retrieve the JWT token from localStorage
+    const token = localStorage.getItem('auth-token');
+    console.log('Token in getTransactionsByAccountNumber:', token); // Debugging token retrieval
+    console.log('selectedAccount in makeTransactions:', selectedAccount); // Debugging userId retrieval
+    console.log('transferAmount in makeTransactions:', transferAmount); // Debugging userId retrieval
+    console.log('selectedBeneficiary in makeTransactions:', beneficiaryAccountNumber); // Debugging userId retrieval
+    if (!token) {
+      console.error('JWT token is not available in localStorage');
+      throw new Error('User is not authenticated');
+    }
+
+    // Add the Authorization header
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    const transferPayload = {
+      selectedAccount,
+      transferAmount,
+      beneficiaryAccountNumber
+    };
+    // Return the HTTP GET request with headers
+    return this.http.post<any>(`${this.baseUrl}/transfer`, transferPayload,{
+      headers,
+    });
+  }
+
 }

@@ -4,5 +4,5 @@ import com.sivaprakash.fund.dto.BeneficiaryRequestDTO;
 import com.sivaprakash.fund.dto.BeneficiaryResponseDTO;
 
 public interface BeneficiaryService {
-	public BeneficiaryResponseDTO addBeneficiary(BeneficiaryRequestDTO request);
+//	public BeneficiaryResponseDTO addBeneficiary(BeneficiaryRequestDTO request);
 }

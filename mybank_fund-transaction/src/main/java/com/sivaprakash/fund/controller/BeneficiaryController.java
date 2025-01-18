@@ -13,45 +13,45 @@ import com.sivaprakash.fund.service.BeneficiaryService;
 
 import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/api/v1/beneficiaries")
+//@RestController
+//@RequestMapping("/api/v1/beneficiaries")
 
 public class BeneficiaryController {
-
-	@Autowired
-    private BeneficiaryService beneficiaryService;
-
-    
-
-	@PostMapping
-    public ResponseEntity<?> addBeneficiary(
-            @Valid @RequestBody BeneficiaryRequestDTO request,
-            BindingResult bindingResult) {
-        
-        if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .reduce("", (a, b) -> a + "; " + b);
-            return ResponseEntity.badRequest().body(new ErrorResponse("Validation failed", errorMessage));
-        }
-
-        try {
-            BeneficiaryResponseDTO response = beneficiaryService.addBeneficiary(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                .body(new ErrorResponse("Failed to add beneficiary", e.getMessage()));
-        }
-    }
-
-    static class ErrorResponse {
-        private final String error;
-        private final String message;
-		public ErrorResponse(String error, String message) {
-			super();
-			this.error = error;
-			this.message = message;
-		}
-        
-    }
+//
+//	@Autowired
+//    private BeneficiaryService beneficiaryService;
+//
+//    
+//
+//	@PostMapping
+//    public ResponseEntity<?> addBeneficiary(
+//            @Valid @RequestBody BeneficiaryRequestDTO request,
+//            BindingResult bindingResult) {
+//        
+//        if (bindingResult.hasErrors()) {
+//            String errorMessage = bindingResult.getFieldErrors().stream()
+//                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+//                .reduce("", (a, b) -> a + "; " + b);
+//            return ResponseEntity.badRequest().body(new ErrorResponse("Validation failed", errorMessage));
+//        }
+//
+//        try {
+//            BeneficiaryResponseDTO response = beneficiaryService.addBeneficiary(request);
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest()
+//                .body(new ErrorResponse("Failed to add beneficiary", e.getMessage()));
+//        }
+//    }
+//
+//    static class ErrorResponse {
+//        private final String error;
+//        private final String message;
+//		public ErrorResponse(String error, String message) {
+//			super();
+//			this.error = error;
+//			this.message = message;
+//		}
+//        
+//    }
 }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sivaprakash.fund.entity.Beneficiary;
 
-@Repository
-public interface BeneficiaryRepository extends JpaRepository<Beneficiary, Long> {
-    boolean existsByBeneficiaryAccountNumber(String accountNumber);
-}
+//@Repository
+//public interface BeneficiaryRepository extends JpaRepository<Beneficiary, Long> {
+//    boolean existsByBeneficiaryAccountNumber(String accountNumber);
+//}

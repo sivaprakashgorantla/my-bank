@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AccountService, AccountDetailsDTO } from '../services/account.service';
 import {
   Transaction,
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [NgClass, CommonModule, FormsModule],
+  imports: [NgClass, CommonModule, FormsModule, RouterLink],
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.css'], // Fixed typo
 })
@@ -20,13 +20,16 @@ export class TransactionsComponent implements OnInit {
   accountNumber: string = '';
   accountName: string = '';
   totalAmount: number | null = null;
-  selectedBeneficiary: string = '';
+  selectedBeneficiary: number | null = null;
   beneficiaries: any[] = [];
   transferAmount: number | null = null;
   accountDetails: AccountDetailsDTO[] = []; // Store account details
   errorMessage: string | null = null;
   selectedAccount: string = '';
   accountBalance: number = 0;
+  beneficiaryAccountNumber: string = '';
+  flag: boolean = false;
+  isValidAmount: boolean = true;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -50,8 +53,18 @@ export class TransactionsComponent implements OnInit {
         this.accountBalance = account.balance;
       }
     });
-
-    //throw new Error('Method not implemented.');
+  }
+  getBeneficiaryAccountNumber($event: any) {
+    console.log('getBeneficiaryAccountNumber', $event);
+    this.beneficiaries.filter((beneficiary) => {
+      if (beneficiary.beneficiaryId == $event) {
+        console.log(
+          'getBeneficiaryAccountNumber :',
+          beneficiary.beneficiaryAccountNumber
+        );
+        this.beneficiaryAccountNumber = beneficiary.beneficiaryAccountNumber;
+      }
+    });
   }
 
   // Load beneficiaries from BeneficiaryService
@@ -87,6 +100,21 @@ export class TransactionsComponent implements OnInit {
     }
   }
 
+  validateAmount() {
+    if (
+      this.transferAmount &&
+      this.transferAmount > 0 &&
+      this.transferAmount <= this.accountBalance
+    ) {
+      this.isValidAmount = true;
+      return true;
+    } else {
+      this.isValidAmount = false;
+      return false;
+    }
+    throw new Error('Method not implemented.');
+  }
+
   // Perform transfer logic
   transfer(): void {
     if (
@@ -99,7 +127,22 @@ export class TransactionsComponent implements OnInit {
         Transfer Amount: ${this.transferAmount},
         Beneficiary: ${this.selectedBeneficiary}
       `);
-      alert('Transfer successful!');
+      this.transactionService
+        .makeTransactions(
+          this.selectedAccount,
+          this.transferAmount,
+          this.beneficiaryAccountNumber
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('Transaction response:', response);
+            this.flag = true;
+          },
+          error: (err) => {
+            this.errorMessage =
+              'Failed to fetch account details. Please try again later.';
+          },
+        });
     } else {
       alert('Please fill in all required fields.');
     }

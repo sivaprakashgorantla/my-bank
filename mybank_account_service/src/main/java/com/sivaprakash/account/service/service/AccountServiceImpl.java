@@ -1,5 +1,6 @@
 package com.sivaprakash.account.service.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,4 +70,26 @@ public class AccountServiceImpl implements AccountService {
 		return accounts.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
+	@Override
+	public boolean updateAccountBalance(String accountNumber, BigDecimal amount, String transactionType) {
+        // Fetch the account from the database
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+            .orElseThrow(() -> new RuntimeException("Account not found: " + accountNumber));
+        
+        // Perform the balance update
+        if (transactionType.equalsIgnoreCase("CREDIT")) {
+            account.setBalance(account.getBalance().add(amount));
+        } else if (transactionType.equalsIgnoreCase("DEBIT")) {
+            if (account.getBalance().compareTo(amount) < 0) {
+                throw new RuntimeException("Insufficient balance for account: " + accountNumber);
+            }
+            account.setBalance(account.getBalance().subtract(amount));
+        } else {
+            throw new IllegalArgumentException("Invalid transaction type: " + transactionType);
+        }
+
+        // Save the updated account
+        accountRepository.save(account);
+        return true;
+    }
 }

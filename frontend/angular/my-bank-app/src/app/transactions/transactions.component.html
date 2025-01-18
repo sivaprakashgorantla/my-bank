@@ -34,6 +34,7 @@
         [(ngModel)]="selectedBeneficiary"
         name="beneficiary"
         required
+        (ngModelChange)="getBeneficiaryAccountNumber($event)"
       >
         <option
           *ngFor="let beneficiary of beneficiaries"
@@ -43,7 +44,13 @@
         </option>
       </select>
     </div>
- 
+ <!-- Total Amount -->
+ <div class="form-group" >
+  <label for="accountNumber">Beneficiary Account Number:</label>
+  {{ beneficiaryAccountNumber }}
+</div>
+
+
     <!-- Account Name (Readonly) -->
     <!-- <div class="form-group">
       <label for="accountName">Account Name:</label>
@@ -65,10 +72,26 @@
         name="transferAmount"
         placeholder="Enter transfer amount"
         required
+        (keyup)="validateAmount()"
       />
+      <div *ngIf="!isValidAmount" >
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong class="font-bold">Invalid Transfer Amount!</strong>
+          <span class="block sm:inline">Plase check balance amount.</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- Transfer Button -->
-    <button type="submit" class="transfer-button">Transfer</button>
+    <button *ngIf="!flag" type="submit" class="transfer-button">Transfer</button>
+    
   </form>
+  <div *ngIf="flag">
+    <div class="bg-green-100 border-t border-b border-green-500 text-green-700 px-4 py-3" role="alert">
+      <p class="font-bold text-center">Transaction Successful</p>
+      <p class="text-sm text-blue-700"><a routerLink="/dashboard">Go to Dashboard</a></p>
+    </div>
+  </div>
+  
 </div>
