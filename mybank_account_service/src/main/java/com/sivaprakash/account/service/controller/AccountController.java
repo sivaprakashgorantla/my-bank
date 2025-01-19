@@ -3,6 +3,7 @@ package com.sivaprakash.account.service.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,19 +43,36 @@ public class AccountController {
 
 		return ResponseEntity.ok().body(new AccountResponseDTO("Accounts retrieved successfully", accounts));
 	}
-
 	@PatchMapping("/update-balance")
 	public ResponseEntity<UpdateBalanceResponseDTO> updateAccountBalance(@RequestBody TransferRequestDTO transferRequestDTO) {
-		// Validate the account and perform the balance update
-		boolean success = accountService.updateAccountBalance(transferRequestDTO.getSelectedAccount(), transferRequestDTO.getTransferAmount(),
-				"DEBIT");
-		boolean success1 = accountService.updateAccountBalance(transferRequestDTO.getBeneficiaryAccountNumber(), transferRequestDTO.getTransferAmount(),
-				"CREDIT");
+	    try {
+	        boolean success = accountService.updateAccountBalance(
+	            transferRequestDTO.getSelectedAccount(), 
+	            transferRequestDTO.getTransferAmount(),
+	            "DEBIT"
+	        );
+	        
+	        boolean success1 = accountService.updateAccountBalance(
+	            transferRequestDTO.getBeneficiaryAccountNumber(), 
+	            transferRequestDTO.getTransferAmount(),
+	            "CREDIT"
+	        );
 
-		UpdateBalanceResponseDTO response = new UpdateBalanceResponseDTO();
-		response.setSuccess(success);
-		response.setMessage(success && success1 ? "Account balance updated successfully." : "Failed to update account balance.");
+	        UpdateBalanceResponseDTO response = new UpdateBalanceResponseDTO();
+	        response.setSuccess(success && success1);
+	        response.setMessage(success && success1 ? 
+	            "Account balance updated successfully." : 
+	            "Failed to update account balance."
+	        );
 
-		return ResponseEntity.ok(response);
+	        return ResponseEntity.ok(response);
+	        
+	    } catch (Exception e) {
+	        UpdateBalanceResponseDTO errorResponse = new UpdateBalanceResponseDTO();
+	        errorResponse.setSuccess(false);
+	        errorResponse.setMessage("Failed to update balance: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                           .body(errorResponse);
+	    }
 	}
 }

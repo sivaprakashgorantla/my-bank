@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -103,14 +105,25 @@ public class TransactionController {
 
         
         
-        restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
-//
+        //restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
+ 
 //        restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
 
-        // Create a response DTO
-        TransferResponseDTO response = new TransferResponseDTO();
-        response.setSuccess(success);
-        response.setMessage(success ? "Transfer completed successfully." : "Transfer failed.");
-
-        return ResponseEntity.ok(response);    }
+        ResponseEntity<UpdateBalanceResponseDTO> response = restTemplate.exchange(
+                url,
+                HttpMethod.PATCH,
+                new HttpEntity<>(transferRequest),
+                UpdateBalanceResponseDTO.class
+            );
+            
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Account balance update failed");
+            }
+            
+            TransferResponseDTO transferResponse = new TransferResponseDTO();
+            transferResponse.setSuccess(true);
+            transferResponse.setMessage("Transfer completed successfully.");
+            
+            return ResponseEntity.ok(transferResponse);
+        }
 }
