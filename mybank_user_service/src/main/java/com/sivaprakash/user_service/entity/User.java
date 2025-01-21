@@ -49,7 +49,7 @@ public class User {
 
     @Column(length = 20)
     @Enumerated(EnumType.STRING)
-    private UserStatus status = UserStatus.ACTIVE;
+    private UserStatus status = UserStatus.INACTIVE;
 
     @Column(length = 20)
     @Enumerated(EnumType.STRING)

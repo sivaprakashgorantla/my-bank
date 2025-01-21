@@ -107,7 +107,7 @@ public class UserService {
             return userRepository.save(user);
             
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update customer ID", e);
+            throw new RuntimeException("Failed to update user id", e);
         }
     }
 
