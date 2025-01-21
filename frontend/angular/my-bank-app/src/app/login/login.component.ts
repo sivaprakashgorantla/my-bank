@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http'; // Correct import
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 interface LoginResponse {
   token: string;
@@ -13,7 +13,7 @@ interface LoginResponse {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, HttpClientModule],
+  imports: [ReactiveFormsModule, CommonModule, HttpClientModule,RouterLink],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

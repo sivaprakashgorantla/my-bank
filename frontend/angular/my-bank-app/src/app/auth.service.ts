@@ -65,6 +65,18 @@ export class AuthService {
       .pipe(catchError((error) => this.handleError(error)));
   }
 
+  validateOtp(otp: string): Observable<any> {
+    const phoneNumber = localStorage.getItem('phoneNumber');
+    const userId = localStorage.getItem('userId');
+    const payload = { otp,phoneNumber ,userId};
+    console.log('OTP payload:', payload);
+    
+    return this.http.post(`${this.authApiUrl}validate-otp`, payload,{
+      responseType: 'text' as 'json',
+    })
+    .pipe(catchError((error) => this.handleError(error)));
+  }
+
   getUserProfile(): Observable<any> {
     const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
     const token = localStorage.getItem('auth-token'); // Retrieve the JWT token from localStorage

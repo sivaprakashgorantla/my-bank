@@ -1,12 +1,13 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule,CommonModule],
+  imports: [ReactiveFormsModule,CommonModule,NgIf],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -15,19 +16,18 @@ export class RegisterComponent {
   registerForm: FormGroup
   
 
-  constructor(private fb: FormBuilder,private authService: AuthService) {
+  constructor(private fb: FormBuilder,private authService: AuthService, private router: Router) {
 
     this.registerForm = this.fb.group({
-      username:['', Validators.required],
-      firstName:['', Validators.required],
-      lastName:['', Validators.required],
-      phoneNumber:['', Validators.required],
-      name: ['', Validators.required],
+      username: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(4)]],
       confirmPassword: ['', Validators.required],
-    }, { 
-      validators: this.passwordMatchValidator
+    }, {
+      validators: this.passwordMatchValidator // password = password
     });
 
   }
@@ -50,12 +50,15 @@ export class RegisterComponent {
             (response) => {
               alert('Registration successful!');
               console.log(response);
+              localStorage.setItem('phoneNumber', phoneNumber);
+              localStorage.setItem('userId', response.userId);
+              this.router.navigateByUrl('/app-user-otp-validation');
             },
+            
             (error) => {
               console.error('Registration error:', error);
             }
           );
-  //    }
-    //}
+          
   }
 }

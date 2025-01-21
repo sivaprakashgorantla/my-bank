@@ -13,6 +13,7 @@ import { BeneficiaryListComponent } from './beneficiary-list/beneficiary-list.co
 import { BeneficiaryComponent } from './beneficiary/beneficiary.component';
 import { AddBeneficiaryComponent } from './beneficiary/add-beneficiary/add-beneficiary.component';
 import { UpdateBeneficiaryComponent } from './beneficiary/update-beneficiary/update-beneficiary.component';
+import { UserOtpValidationComponent } from './user-otp-validation/user-otp-validation.component';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,7 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'app-user-otp-validation', component: UserOtpValidationComponent },
   { path: 'forgot-password', component: ForgetpasswordComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
