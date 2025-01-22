@@ -17,6 +17,7 @@ interface JwtPayload {
 export class AuthService {
   private authApiUrl = 'http://localhost:7878/api/v1/auth/'; // Replace with your API URL
   private userApiUrl = 'http://localhost:7878/api/v1/users/'; // Replace with your API URL
+  private customerApiUrl = 'http://localhost:7878/api/v1/customers/'; // Replace with your API URL
   private tokenKey = 'auth-token'; // Store the JWT token in local storage
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -28,21 +29,14 @@ export class AuthService {
       .subscribe((response: any) => {
         const { token, userId, username, customerId } = response;
         this.saveToken(token);
-
+        console.log('Token:', token);
+        console.log('login =========userId:', userId);
         localStorage.setItem('userId', userId);
         localStorage.setItem('username', username);
         localStorage.setItem('customerId', customerId);
         this.router.navigate(['/dashboard']);
       });
   }
-
-  // login(username: string, password: string): Observable<any> {
-  //   const loginPayload = { username, password };
-  //   return this.http.post<any>(`${this.authApiUrl}login`, loginPayload).pipe(
-  //     catchError((error) => this.handleError(error))
-  //   );
-  // }
-
   // Register method
   register(
     username: string,
@@ -63,6 +57,7 @@ export class AuthService {
     return this.http
       .post<any>(`${this.authApiUrl}register`, registerPayload)
       .pipe(catchError((error) => this.handleError(error)));
+      
   }
 
   validateOtp(otp: string): Observable<any> {

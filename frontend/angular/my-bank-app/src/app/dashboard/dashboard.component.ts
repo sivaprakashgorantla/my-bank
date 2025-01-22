@@ -17,16 +17,17 @@ export class DashboardComponent implements OnInit {
   accountDetails: AccountDetailsDTO[] = []; // Store account details
   errorMessage: string | null = null;
 
-  constructor(private router: Router, private accountService: AccountService) { }
+  constructor(private router: Router, private accountService: AccountService) {}
 
   ngOnInit(): void {
     // Fetch the logged-in user's username
     this.username = localStorage.getItem('username') || 'Guest';
 
     // Replace with dynamic user ID as needed
-    
+    const userId = localStorage.getItem('userId')!;
     const customerId = localStorage.getItem('customerId')!;
-    console.log('for fetchAccountDetails customerId ID:', customerId);
+
+    console.log('ngOnInit fetchAccountDetails customerId ID:', customerId);
     if (customerId) {
       this.fetchAccountDetails(customerId);
     } else {
@@ -43,7 +44,6 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchAccountDetails(customerId: string): void {
-
     this.accountService.getAccountsByCustomerId(customerId).subscribe({
       next: (response) => {
         if (response.accounts) {
@@ -54,8 +54,20 @@ export class DashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.errorMessage = 'Failed to fetch account details. Please try again later.';
+        this.errorMessage =
+          'Failed to fetch account details. Please try again later.';
       },
     });
+
+    this.accountService.getCustomerIdByUserId().subscribe({
+      next: (response) => {
+        console.log('customerId:', response);
+        localStorage.setItem('customerId', response.customerId);
+      },
+      error: (err) => {
+        console.error('Failed to fetch customer ID:', err);
+      },
+    });
+    
   }
 }

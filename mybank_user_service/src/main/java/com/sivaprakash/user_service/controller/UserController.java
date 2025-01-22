@@ -1,7 +1,5 @@
 package com.sivaprakash.user_service.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sivaprakash.user_service.dto.LoginRequestDTO;
 import com.sivaprakash.user_service.dto.UserResponseDTO;
+import com.sivaprakash.user_service.entity.Customer;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.service.UserService;
 
@@ -47,19 +46,25 @@ public class UserController {
 	
 	@PostMapping("/validate")
     public ResponseEntity<UserResponseDTO> validateUser(@RequestBody LoginRequestDTO loginRequest) {
-        User userData = userService.validateUser(loginRequest.getUsername());
-        System.out.println("User controller validate : "+userData);
+        User user = userService.validateUser(loginRequest.getUsername());
+        System.out.println("User controller validate : "+user);
         System.out.println("User controller validate encoder : "+passwordEncoder.encode(loginRequest.getPassword()));
-        if (userData != null && passwordEncoder.matches(loginRequest.getPassword(), userData.getPassword())) {
+        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
 
-            UserResponseDTO response = new UserResponseDTO(
-                    userData.getUserId(), // You might want to store actual IDs
-                    userData.getUsername(),
-                    userData.getEmail(),
-                    userData.getRole(),
-                    userData.getCustomerId()
-	
-            );
+        	String customerId = userService.getCustomeByUserId(user.getUserId());
+            UserResponseDTO response =
+                	 new UserResponseDTO(
+                            user.getUserId(),
+                            user.getUsername(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            null,  // Don't send password back
+                            user.getEmail(),
+                            customerId!=null ? customerId : null,
+                            user.getPhoneNumber(),
+                            user.getStatus().toString()
+                        );
+            
             System.out.println("response :"+response);
             return ResponseEntity.ok(response);
         }
@@ -95,7 +100,8 @@ public class UserController {
 	public ResponseEntity<?> updateUserProfile(@RequestBody User updateUser) {
 		try {
 			System.out.println("updated updateUser controller  save : "+updateUser);
-			return ResponseEntity.ok(userService.updateUser(updateUser));
+			User updatedUser = userService.updateUser(updateUser);
+			return ResponseEntity.ok(updatedUser);
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}

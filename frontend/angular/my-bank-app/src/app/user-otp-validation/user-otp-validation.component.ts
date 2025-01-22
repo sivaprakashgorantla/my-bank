@@ -4,7 +4,7 @@ import { AuthService } from '../auth.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { DashboardComponent } from "../dashboard/dashboard.component";
 import { BeneficiaryListComponent } from "../beneficiary-list/beneficiary-list.component";
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-user-otp-validation',
@@ -15,8 +15,9 @@ import { RouterLink } from '@angular/router';
 })
 export class UserOtpValidationComponent {
   otpForm: FormGroup;
+  url : string = 'http://localhost:7878/api/v1/cutomers/create';
   isSuccess = false;
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private authService: AuthService,private router: Router) {
     this.otpForm = this.fb.group({
       otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]], // Only 6-digit numbers allowed
     });
@@ -34,8 +35,9 @@ export class UserOtpValidationComponent {
             alert('OTP validated successfully!');
             console.log(response);
             this.isSuccess = true;
-            localStorage.removeItem('phoneNumber');
-            localStorage.removeItem('id');
+            // localStorage.removeItem('phoneNumber');
+            // localStorage.removeItem('userId');
+            //this.crateCustomer();
           },
           (error) => {
             alert('OTP validation failed.');
@@ -44,4 +46,6 @@ export class UserOtpValidationComponent {
         );
     }
   }
+
+  
 }

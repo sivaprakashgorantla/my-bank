@@ -97,4 +97,12 @@ public class UserResponseDTO {
 		this.status = status;
 	}
 
+	@Override
+	public String toString() {
+		return "UserResponseDTO [userId=" + userId + ", username=" + username + ", firstName=" + firstName
+				+ ", lastName=" + lastName + ", password=" + password + ", email=" + email + ", customerId="
+				+ customerId + ", phoneNumber=" + phoneNumber + ", status=" + status + "]";
+	}
+
+	
 }

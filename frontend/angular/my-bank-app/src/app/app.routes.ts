@@ -14,6 +14,7 @@ import { BeneficiaryComponent } from './beneficiary/beneficiary.component';
 import { AddBeneficiaryComponent } from './beneficiary/add-beneficiary/add-beneficiary.component';
 import { UpdateBeneficiaryComponent } from './beneficiary/update-beneficiary/update-beneficiary.component';
 import { UserOtpValidationComponent } from './user-otp-validation/user-otp-validation.component';
+import { ValidateCustomerComponent } from './validate-customer/validate-customer.component';
 
 export const routes: Routes = [
   {
@@ -28,8 +29,8 @@ export const routes: Routes = [
       { path: 'app-beneficiary-list', component: BeneficiaryListComponent },
       { path: 'app-beneficiary', component: BeneficiaryComponent },
       { path: 'app-add-beneficiary', component: AddBeneficiaryComponent },
-      { path: 'app-update-beneficiary/:beneficiaryId', component: UpdateBeneficiaryComponent }
-      
+      { path: 'app-update-beneficiary/:beneficiaryId', component: UpdateBeneficiaryComponent },
+      { path: 'app-validate-customer',component:ValidateCustomerComponent },
     ]
   },
   { path: 'login', component: LoginComponent },

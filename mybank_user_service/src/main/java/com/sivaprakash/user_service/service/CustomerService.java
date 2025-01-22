@@ -1,7 +1,14 @@
 package com.sivaprakash.user_service.service;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sivaprakash.user_service.dto.CustomerProfileDTO;
 import com.sivaprakash.user_service.dto.CustomerProfileUpdateRequest;
@@ -12,11 +19,11 @@ import com.sivaprakash.user_service.enums.ProfileStatus;
 import com.sivaprakash.user_service.exception.ResourceNotFoundException;
 import com.sivaprakash.user_service.repository.CustomerRepository;
 import com.sivaprakash.user_service.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
-import jakarta.validation.ValidationException;
 
 @Service
 public class CustomerService {
+
+	private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
 	@Autowired
 	private CustomerRepository customerRepository;
@@ -24,23 +31,12 @@ public class CustomerService {
 	@Autowired
 	private UserRepository userRepository;
 	
-	@Autowired
-	private OtpService otpService;
-	
-	/*
-	 * @Autowired private BankService bankService;
-	 */
-//    @Autowired
-//    public CustomerService(CustomerRepository customerRepository, 
-//                         UserRepository userRepository,
-//                         OtpService otpService,
-//                         BankService bankService) {
-//        this.customerRepository = customerRepository;
-//        this.userRepository = userRepository;
-//        this.otpService = otpService;
-//        this.bankService = bankService;
-//    }
 
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+
+	private static final int OTP_EXPIRATION_MINUTES = 30;
+	
 	@Transactional(readOnly = true)
 	public CustomerProfileDTO getCustomerProfile(String username) {
 		User user = userRepository.findByUsername(username)
@@ -68,17 +64,6 @@ public class CustomerService {
 		Customer customer = customerRepository.findByUser(user)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-		// Validate with bank backend
-//		boolean isValidCustomer = bankService.validateCustomerDetails(request.getCustomerId(), user.getPhoneNumber(),
-//				user.getEmail());
-//
-//		if (!isValidCustomer) {
-//			throw new ValidationException("Invalid customer details");
-//		}
-
-		// Generate and send OTP
-		String otp = otpService.generateOtp(user.getUsername());
-		otpService.sendOtp(user.getPhoneNumber(), user.getEmail(), otp);
 
 		// Update customer ID (will be confirmed after OTP validation)
 		customer.setCustomerId(request.getCustomerId());
@@ -92,12 +77,6 @@ public class CustomerService {
 
 		Customer customer = customerRepository.findByUser(user)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-
-		boolean isValidOtp = otpService.validateOtp(request.getUsername(), request.getOtp());
-
-		if (!isValidOtp) {
-			throw new ValidationException("Invalid OTP");
-		}
 
 		customer.setProfileStatus(ProfileStatus.VERIFIED);
 		customerRepository.save(customer);
@@ -113,4 +92,63 @@ public class CustomerService {
 		String maskedName = name.substring(0, 2) + "XXXX" + name.substring(name.length() - 2);
 		return maskedName + "@" + parts[1];
 	}
+
+	public Customer createCustmer(Long userId) {
+	    // Fetch the user from the database to ensure it exists
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+	    // Create a new Customer and associate the fetched user
+	    Customer customer = new Customer();
+	    customer.setUser(user); // Set the user object in the customer
+	    return customerRepository.save(customer);
+	}
+	
+	public void sendOtp(String phoneNumber, String email) {
+		// Generate OTP
+		String otp = generateOtp();
+
+		// Store OTP in Redis with expiration
+		redisTemplate.opsForValue().set("OTP_" + phoneNumber, otp, OTP_EXPIRATION_MINUTES, TimeUnit.MINUTES);
+
+		// Mock sending OTP via email and SMS
+		logger.info("Sending OTP '{}' to phone: {} and email: {}", otp, phoneNumber, email);
+
+		// Use an actual email or SMS service to send the OTP here
+	}
+
+	public boolean validateOtp(String phoneNumber, String otp) {
+		String storedOtp = redisTemplate.opsForValue().get("OTP_" + phoneNumber);
+
+		if (storedOtp != null && storedOtp.equals(otp)) {
+			// OTP is valid; remove from Redis
+			redisTemplate.delete("OTP_" + phoneNumber);
+			logger.info("OTP validated successfully for phone: {}", phoneNumber);
+			return true;
+		}
+
+		logger.warn("Invalid OTP '{}' for phone: {}", otp, phoneNumber);
+		return false;
+	}
+
+	private String generateOtp() {
+		Random random = new Random();
+		return String.format("%06d", random.nextInt(1000000)); // Generate a 6-digit OTP
+	}
+	
+	@Transactional(readOnly = true)
+	public String getCustomerIdByUserId(Long userId) {
+	    // Fetch the user by ID to ensure it exists
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+	    // Fetch the customer associated with the user
+	    Customer customer = customerRepository.findByUser(user)
+	            .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user ID: " + userId));
+
+	    // Return the customer ID
+	    return customer.getCustomerId();
+	}
+
+
 }

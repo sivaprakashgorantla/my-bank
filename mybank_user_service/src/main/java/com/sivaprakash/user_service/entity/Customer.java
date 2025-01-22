@@ -47,6 +47,14 @@ public class Customer {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+
+        if (customerId == null) {
+            this.customerId = generateCustomerId();
+        }
+    }
+
+    private String generateCustomerId() {
+        return "CUST" + String.format("%03d", this.id != null ? this.id : 0); // Adds prefix and pads with zeros
     }
 
     @PreUpdate

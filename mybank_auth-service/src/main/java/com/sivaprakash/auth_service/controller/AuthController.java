@@ -45,7 +45,8 @@ public class AuthController {
 				 * userService.validateOtp(String.valueOf(user.getPhoneNumber()),
 				 * loginRequest.getOtp()); if (!isOtpValid) { return
 				 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP"); }
-				 */                String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId());
+				 */
+            	String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId());
                 return ResponseEntity.ok(new AuthResponseDTO(token,user.getUserId(),user.getUsername(),user.getCustomerId()));
             }
 
@@ -107,6 +108,7 @@ public class AuthController {
                 boolean isUpdated = authService.updateUser(user);
 
                 if (isUpdated) {
+                	authService.createCustomer(user.getUserId());
                     return ResponseEntity.ok("OTP validated successfully and user status updated to ACTIVE.");
                 } else {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user status.");

@@ -32,7 +32,7 @@ public class AuthService {
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 
-	private static final int OTP_EXPIRATION_MINUTES = 5;
+	private static final int OTP_EXPIRATION_MINUTES = 30;
 
 	public UserResponseDTO validateUser(LoginRequestDTO loginRequest) {
 		String url = "http://localhost:8081/api/v1/users/validate";
@@ -45,6 +45,7 @@ public class AuthService {
 		try {
 			HttpEntity<LoginRequestDTO> request = new HttpEntity<>(loginRequest, headers);
 			userResponseDTO = restTemplate.postForObject(url, request, UserResponseDTO.class);
+			System.out.println("userResponseDTO in login  :"+userResponseDTO);
 		} catch (RestClientException e) {
 			logger.error("Error validating user: {}", e.getMessage(), e);
 		}
@@ -143,6 +144,27 @@ public class AuthService {
 	        return true;
 	    } catch (RestClientException e) {
 	        logger.error("Error updating user: {}", e.getMessage(), e);
+	        return false;
+	    }
+	}
+
+	public boolean createCustomer(Long userId) {
+	    String url = "http://localhost:8081/api/v1/customers/create-customer/" + userId; // Adjust the endpoint if necessary
+	    logger.info("createCustomer in service : {}", userId);
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON); // Content type as JSON
+
+	    try {
+	        // Use POST method with RestTemplate
+	        HttpEntity<Void> request = new HttpEntity<>(headers); // No request body is needed here
+	        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+	        // Log response and return success
+	        logger.info("Customer creation response: {}", response.getBody());
+	        return response.getStatusCode().is2xxSuccessful();
+	    } catch (RestClientException e) {
+	        logger.error("Error creating customer: {}", e.getMessage(), e);
 	        return false;
 	    }
 	}

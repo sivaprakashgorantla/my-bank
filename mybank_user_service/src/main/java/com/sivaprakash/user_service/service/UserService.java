@@ -6,19 +6,22 @@ import java.util.Random;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.sivaprakash.user_service.entity.Customer;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.repository.UserRepository;
-
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private CustomerService customerService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -175,5 +178,29 @@ public class UserService {
     	}
     		
     }
+	public boolean createCustomer(Long userId) {
+		// TODO Auto-generated method stub
+		try {
+			Customer customer = customerService.createCustmer(userId);
+			return customer!=null;
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(" User sergice createCustomer()");
+			return false;
+		}
+		
+	}
+	public String getCustomeByUserId(Long userId) {
+	    try {
+	        // Delegate to CustomerService to fetch the customer by userId
+	        String customerId = customerService.getCustomerIdByUserId(userId);
+	        System.out.println("Customer fetched: " + customerId);
+	        return customerId;
+	    } catch (Exception e) {
+	        // Log the error and rethrow as a runtime exception
+	        System.out.println("Error fetching customer for user ID " + userId + ": " + e.getMessage());
+	        throw new RuntimeException("Failed to fetch customer for user ID: " + userId, e);
+	    }
+	}
 }
 

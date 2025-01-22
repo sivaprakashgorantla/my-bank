@@ -41,7 +41,7 @@ export class LoginComponent {
       const credentials = this.loginForm.value;
 
       this.authService.login(credentials);
-
+  
     } else {
       this.errorMessage = 'Please fill in all fields correctly.';
     }
