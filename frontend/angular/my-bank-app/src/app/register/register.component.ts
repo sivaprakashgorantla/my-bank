@@ -52,6 +52,7 @@ export class RegisterComponent {
               console.log(response);
               localStorage.setItem('phoneNumber', phoneNumber);
               localStorage.setItem('userId', response.userId);
+              console.log('register submi userId:', response.userId);
               this.router.navigateByUrl('/app-user-otp-validation');
             },
             
