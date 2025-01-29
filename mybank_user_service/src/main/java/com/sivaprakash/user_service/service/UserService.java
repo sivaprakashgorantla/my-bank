@@ -4,203 +4,176 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.sivaprakash.user_service.entity.Customer;
 import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.repository.UserRepository;
+
 @Service
 public class UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private CustomerService customerService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
-// get all users from the database
+
+    // Fetch all users
     public List<User> getAllUsers() {
-        return (List<User>) userRepository.findAll();
+        logger.info("Fetching all users");
+        return userRepository.findAll();
     }
-    // Simulate sending OTP via SMS and email (mocking for now)
-    private void sendOtp(User user) {
+
+    // Generate and save OTP in the database
+    private String generateAndSaveOtp(User user) {
         String otp = generateOtp();
-        user.setOtp(otp); // Set OTP in the user's entity
-
-        // Simulate sending OTP to email and mobile number
-        System.out.println("Sending OTP: " + otp + " to email: " + user.getEmail() + " and mobile: " + user.getPhoneNumber());
-        
-        // TODO: Integrate real email and SMS service here (e.g., SendGrid for email, Twilio for SMS)
+        user.setOtp(otp);
+        userRepository.save(user);
+        logger.info("Generated OTP: {} for user: {}", otp, user.getUsername());
+        return otp;
     }
 
-    // Generate a random OTP (6 digits)
+    // Generate a 6-digit OTP
     private String generateOtp() {
         Random random = new Random();
-        return String.format("%06d", random.nextInt(1000000)); // 6-digit OTP
+        return String.format("%06d", random.nextInt(1000000));
     }
 
-    // Register user and send OTP
+    // Register a new user
     public User registerUser(User user) {
-    	System.out.println("registerUser Service : "+user);
-    	
+        logger.info("Registering user: {}", user.getUsername());
+
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            logger.error("Registration failed. Email {} already exists.", user.getEmail());
             throw new IllegalArgumentException("Email already exists");
         }
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            logger.error("Registration failed. Username {} already exists.", user.getUsername());
             throw new IllegalArgumentException("Username already exists");
         }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        
-        sendOtp(savedUser); // Send OTP after user is saved
-        
+
+        generateAndSaveOtp(savedUser);
+        logger.info("User registered successfully: {}", savedUser.getUsername());
         return savedUser;
     }
 
-    // Verify OTP during registration
+    // Verify OTP
     public String verifyOtp(String username, String otp) {
+        logger.info("Verifying OTP for user: {}", username);
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            logger.error("OTP verification failed for user: {}. Invalid OTP.", username);
             throw new IllegalArgumentException("Invalid OTP");
         }
 
-        // Clear OTP after successful verification
         user.setOtp(null);
         userRepository.save(user);
-        
+        logger.info("OTP verified successfully for user: {}", username);
         return "OTP verification successful";
     }
 
-    // Login user with validation
+    // Login user
     public Optional<User> login(String email, String password) {
-    	System.out.println("Login service "+email +" : "+password);
-        if (email == null || email.isEmpty()) {
-            throw new IllegalArgumentException("UsernameSystem.out.println(\"Login..................\"+optionalUser.get()); cannot be null or empty");
-        }
-        if (password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be null or empty");
-        }
-        
-        Optional<User> dbUser  = userRepository.findByEmail(email);
-        if(dbUser.isPresent() ) {
-        	System.out.println("service login Details : ");
-        }else {
-        	System.out.println("service NO.................. login Details : ");
-        }
-        return userRepository.findByEmail(email);
-    }
-    // Update customer ID for the user
+        logger.info("Logging in user with email: {}", email);
 
+        Optional<User> dbUser = userRepository.findByEmail(email);
+        if (dbUser.isPresent() && passwordEncoder.matches(password, dbUser.get().getPassword())) {
+            logger.info("Login successful for user: {}", email);
+            return dbUser;
+        } else {
+            logger.warn("Login failed for user: {}. Invalid credentials.", email);
+            return Optional.empty();
+        }
+    }
+
+    // Update user information
     public User updateUser(User updateUser) {
-        try {
-            User user = userRepository.findById(updateUser.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            BeanUtils.copyProperties(updateUser, user);
-            System.out.println("updated user before save : "+user);
-            return userRepository.save(user);
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update user id", e);
-        }
+        logger.info("Updating user with ID: {}", updateUser.getUserId());
+
+        User user = userRepository.findById(updateUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        BeanUtils.copyProperties(updateUser, user, "userId", "password");
+        User updatedUser = userRepository.save(user);
+
+        logger.info("User updated successfully with ID: {}", updatedUser.getUserId());
+        return updatedUser;
     }
 
-    // Get user by ID and create    to delete user by ID
-
-    public User getUserById(Long Id   ) {
-        return userRepository.findById(Id)
+    // Fetch user by ID
+    public User getUserById(Long id) {
+        logger.info("Fetching user by ID: {}", id);
+        return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
+//
+//    // Fetch user by customer ID
+//    public User getUserByCustomerId(String customerId) {
+//        logger.info("Fetching user by customer ID: {}", customerId);
+//        return customerService.getCustomerIdByUserId(customerId)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//    }
 
-    public User getUserByCustomerId(String customerId) {
-        return userRepository.findByCustomerId(customerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-
-    // update user profile based on user id
-    public User updateUserProfile(Long userId, User user) {
-        try {
-            User existingUser = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            existingUser.setFirstName(user.getFirstName());
-            existingUser.setLastName(user.getLastName());
-            existingUser.setEmail(user.getEmail());
-            existingUser.setPhoneNumber(user.getPhoneNumber());
-            existingUser.setDateOfBirth(user.getDateOfBirth());
-            existingUser.setAddress(user.getAddress());
-            return userRepository.save(existingUser);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update user profile", e);
-        }
-    }
-
+    // Delete user by ID
     public void deleteUserById(Long userId) {
-        try {
-            userRepository.deleteById(userId);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete user", e);
-        }
+        logger.info("Deleting user with ID: {}", userId);
+        userRepository.deleteById(userId);
+        logger.info("User deleted successfully with ID: {}", userId);
     }
 
-    
+    // Fetch user by username
     public Optional<User> getUserByName(String username) {
-    	System.out.println("getUserName service "+username);
-        if (username == null || username.isEmpty()) {
-            throw new IllegalArgumentException("UsernameSystem.out.println(\"Login..................\"+optionalUser.get()); cannot be null or empty");
-        }
-        
-        Optional<User> dbUser  = userRepository.findByUsername(username);
-        if(dbUser.isPresent() ) {
-        	System.out.println("service login Details : ");
-        }else {
-        	System.out.println("service NO.................. login Details : ");
-        }
-        return userRepository.findByEmail(username);
+        logger.info("Fetching user by username: {}", username);
+        return userRepository.findByUsername(username);
     }
-    
-    public User validateUser(String username) {
-    	Optional<User> findByUsername = userRepository.findByUsername(username);
-    	
-    	if(findByUsername.isPresent()) {
-    		System.out.println(findByUsername.get().getPassword());
-    		return findByUsername.get();
-    	}else {
-    		 throw new RuntimeException("Failed to get user");
-    	}
-    		
-    }
-	public boolean createCustomer(Long userId) {
-		// TODO Auto-generated method stub
-		try {
-			Customer customer = customerService.createCustmer(userId);
-			return customer!=null;
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(" User sergice createCustomer()");
-			return false;
-		}
-		
-	}
-	public String getCustomeByUserId(Long userId) {
-	    try {
-	        // Delegate to CustomerService to fetch the customer by userId
-	        String customerId = customerService.getCustomerIdByUserId(userId);
-	        System.out.println("Customer fetched: " + customerId);
-	        return customerId;
-	    } catch (Exception e) {
-	        // Log the error and rethrow as a runtime exception
-	        System.out.println("Error fetching customer for user ID " + userId + ": " + e.getMessage());
-	        throw new RuntimeException("Failed to fetch customer for user ID: " + userId, e);
-	    }
-	}
-}
 
+    // Validate user by username
+    public User validateUser(String username) {
+        logger.info("Validating user by username: {}", username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // Create a customer for a user
+    public boolean createCustomer(Long userId) {
+        logger.info("Creating customer for user ID: {}", userId);
+        try {
+            Customer customer = customerService.createCustmer(userId);
+            logger.info("Customer created successfully for user ID: {}", userId);
+            return customer != null;
+        } catch (Exception e) {
+            logger.error("Failed to create customer for user ID: {}. Error: {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
+    // Fetch customer by user ID
+    public Long getCustomeByUserId(Long userId) {
+        logger.info("Fetching customer by user ID: {}", userId);
+        try {
+            Long customerId = customerService.getCustomerIdByUserId(userId);
+            logger.info("Customer fetched successfully: {} for user ID: {}", customerId, userId);
+            return customerId;
+        } catch (Exception e) {
+            logger.error("Error fetching customer for user ID: {}. Error: {}", userId, e.getMessage());
+            throw new RuntimeException("Failed to fetch customer for user ID: " + userId, e);
+        }
+    }
+}

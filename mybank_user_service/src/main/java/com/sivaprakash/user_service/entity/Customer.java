@@ -20,56 +20,43 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "customers")
-
 public class Customer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_id_seq")
-    @SequenceGenerator(name = "customer_id_seq", sequenceName = "customer_id_seq", allocationSize = 1)
-     private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_id_seq")
+	@SequenceGenerator(name = "customer_id_seq", sequenceName = "customer_id_seq", allocationSize = 1)
+	private Long customerId;
 
-    @Column(name = "customer_id", unique = true)
-    private String customerId;
+	@OneToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@Column(name = "profile_status")
+	@Enumerated(EnumType.STRING)
+	private ProfileStatus profileStatus = ProfileStatus.PENDING;
 
-    @Column(name = "profile_status")
-    @Enumerated(EnumType.STRING)
-    private ProfileStatus profileStatus = ProfileStatus.PENDING;
+	@Column(name = "created_at", updatable = false)
+	private LocalDateTime createdAt;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-
-        if (customerId == null) {
-            this.customerId = generateCustomerId();
-        }
-    }
-
-    private String generateCustomerId() {
-        return "CUST" + String.format("%03d", this.id != null ? this.id : 0); // Adds prefix and pads with zeros
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-	public Customer() {
-		super();
+	// Set createdAt automatically before persisting the entity
+	@PrePersist
+	protected void onCreate() {
+		this.createdAt = LocalDateTime.now(); // Set createdAt to the current time before insert
 	}
 
-	public Customer(Long id, String customerId, User user, ProfileStatus profileStatus, LocalDateTime createdAt,
+	@PreUpdate
+	protected void onUpdate() {
+		this.updatedAt = LocalDateTime.now(); // Update updatedAt on each update
+	}
+
+	public Customer() {
+	}
+
+	public Customer(Long customerId, User user, ProfileStatus profileStatus, LocalDateTime createdAt,
 			LocalDateTime updatedAt) {
 		super();
-		this.id = id;
 		this.customerId = customerId;
 		this.user = user;
 		this.profileStatus = profileStatus;
@@ -77,19 +64,11 @@ public class Customer {
 		this.updatedAt = updatedAt;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getCustomerId() {
+	public Long getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(String customerId) {
+	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
 	}
 
@@ -125,11 +104,6 @@ public class Customer {
 		this.updatedAt = updatedAt;
 	}
 
-	@Override
-	public String toString() {
-		return "Customer [id=" + id + ", customerId=" + customerId + ", user=" + user + ", profileStatus="
-				+ profileStatus + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
-	}
-    
-    
+	// Constructors, getters, setters, toString methods
+
 }

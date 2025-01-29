@@ -1,7 +1,5 @@
 package com.sivaprakash.user_service.dto;
 
-import com.sivaprakash.user_service.entity.User.Role;
-import com.sivaprakash.user_service.entity.User.UserStatus;
 
 public class UserResponseDTO {
 	private Long userId;

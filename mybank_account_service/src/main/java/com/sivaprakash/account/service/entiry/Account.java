@@ -2,6 +2,7 @@ package com.sivaprakash.account.service.entiry;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "accounts")
@@ -36,6 +37,22 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    public  String generateAccountNumber() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder accountNumber = new StringBuilder("ACC");
+
+        // Add current timestamp in milliseconds for uniqueness
+        long timestamp = System.currentTimeMillis();
+        accountNumber.append(timestamp);
+
+        // Add a few random digits for additional randomness
+        for (int i = 0; i < 3; i++) { // Add 3 random digits
+            accountNumber.append(random.nextInt(10));
+        }
+
+        return accountNumber.toString();
+    }
+    
 
 	public Account() {
 		super();

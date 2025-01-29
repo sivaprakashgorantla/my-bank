@@ -48,6 +48,29 @@ export class AccountService {
     });
   }
 
+
+  getAccountsByAccountNumber(accountNumber: string): Observable<AccountResponseDTO> {
+    // Retrieve the JWT token from localStorage
+    const token = localStorage.getItem('auth-token');
+    console.log('Token in getAccountsByUserId:', token); // Debugging token retrieval
+    console.log('User id in accountNumber:', accountNumber); // Debugging userId retrieval
+
+    if (!token) {
+      console.error('JWT token is not available in localStorage');
+      throw new Error('User is not authenticated');
+    }
+
+    // Add the Authorization header
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Return the HTTP GET request with headers
+    return this.http.get<AccountResponseDTO>(`${this.baseUrl}/${accountNumber}`, {
+      headers,
+    });
+  }
+
   getCustomerIdByUserId(): Observable<any> {
     const userId = localStorage.getItem('userId')!;
     const token = localStorage.getItem('auth-token');

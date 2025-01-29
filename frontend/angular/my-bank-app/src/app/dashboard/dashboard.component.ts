@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit {
     this.accountService.getCustomerIdByUserId().subscribe({
       next: (response) => {
         console.log('customerId:', response);
-        localStorage.setItem('customerId', response.customerId);
+        //localStorage.setItem('customerId', response.customerId);
       },
       error: (err) => {
         console.error('Failed to fetch customer ID:', err);

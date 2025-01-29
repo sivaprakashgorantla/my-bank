@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -32,23 +32,38 @@ export class UserService {
   }
 
   updateUserProfile(profile: any): Observable<any> {
-    console.log('updateUserProfile..................');
-    const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
-    const token = localStorage.getItem('auth-token'); // Retrieve the JWT token from localStorage
-    console.log('Token in updateUserProfile:', token); // Debugging token retrieval
-    console.log('userId in updateUserProfile:', userId); // Debugging userId retrieval
+    // Retrieve the userId and token from localStorage
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('auth-token');
+  
+    if (!userId) {
+      console.error('User ID is missing in localStorage');
+      return throwError(() => new Error('User ID is not available.'));
+    }
+  
     if (!token) {
       console.error('JWT token is not available in localStorage');
-      throw new Error('User is not authenticated');
+      return throwError(() => new Error('User is not authenticated.'));
     }
-
+  
+    // Configure HTTP headers
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`, // Add the Authorization header
+      Authorization: `Bearer ${token}`, // Attach token in Authorization header
+      'Content-Type': 'application/json', // Ensure the correct Content-Type header
     });
-    return this.http.get<any>(`${this.userApiUrl}${userId}`, {
-      headers,
-    });
+  
+    // Make the HTTP PUT request
+    return this.http.put<any>(`${this.userApiUrl}${userId}`, profile, { headers }).pipe(
+      tap(() => {
+        console.log('updateUserProfile successful for userId:', userId); // Debugging success
+      }),
+      catchError((error) => {
+        console.error('Error updating user profile:', error);
+        return throwError(() => new Error('Failed to update user profile.'));
+      })
+    );
   }
+  
 
   // Save the JWT token to local storage
   saveToken(token: string): void {

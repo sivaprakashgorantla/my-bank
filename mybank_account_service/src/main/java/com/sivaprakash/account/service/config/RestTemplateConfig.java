@@ -18,6 +18,8 @@ public class RestTemplateConfig {
         factory.setConnectTimeout(5000);
         factory.setReadTimeout(5000);
         
+        System.out.println("**********************************************RestTemplateConfig**************************************");
+        
         template.setRequestFactory(factory);
         return template;
     }}

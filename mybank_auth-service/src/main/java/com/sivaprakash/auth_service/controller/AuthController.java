@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sivaprakash.auth_service.dto.AuthResponseDTO;
+import com.sivaprakash.auth_service.dto.CustomerResponseDTO;
 import com.sivaprakash.auth_service.dto.LoginRequestDTO;
 import com.sivaprakash.auth_service.dto.OtpValidateDTO;
 import com.sivaprakash.auth_service.dto.RegisterRequestDTO;
@@ -38,16 +39,19 @@ public class AuthController {
 
         try {
             UserResponseDTO user = authService.validateUser(loginRequest);
+           // UserResponseDTO customer = authService.getCustomerByuserId(null);
             System.out.println("Auth UserResponseDTO :"+user);
             if(user != null) {
-				/*
+            	String customerId = authService.getCustomerByuserId(user.getUserId());
+            	System.out.println("customerId 1 : "+customerId);
+            	/*
 				 * boolean isOtpValid =
 				 * userService.validateOtp(String.valueOf(user.getPhoneNumber()),
 				 * loginRequest.getOtp()); if (!isOtpValid) { return
 				 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP"); }
 				 */
             	String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId());
-                return ResponseEntity.ok(new AuthResponseDTO(token,user.getUserId(),user.getUsername(),user.getCustomerId()));
+                return ResponseEntity.ok(new AuthResponseDTO(token,user.getUserId(),user.getUsername(),customerId));
             }
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

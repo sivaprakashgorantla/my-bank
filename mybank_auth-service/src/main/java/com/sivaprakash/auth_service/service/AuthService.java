@@ -1,7 +1,6 @@
 package com.sivaprakash.auth_service.service;
 
 import java.util.Random;
-
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.sivaprakash.auth_service.dto.CustomerResponseDTO;
 import com.sivaprakash.auth_service.dto.LoginRequestDTO;
 import com.sivaprakash.auth_service.dto.RegisterRequestDTO;
 import com.sivaprakash.auth_service.dto.UserResponseDTO;
@@ -130,7 +130,37 @@ public class AuthService {
 
 	    return userResponseDTO;
 	}
+
+	public String getCustomerByuserId(Long id) {
+	    String url = "http://localhost:8081/api/v1/customers/customer-id/" + id; // Append ID to the URL
+	    logger.info("getCustomerByuserId user by ID: {}", id);
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON); // Optional for GET
+
+	    String responseBody = null;
+
+	    try {
+	        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+	        // Fetch response as a String
+	        ResponseEntity<String> response = restTemplate.exchange(
+	            url,
+	            HttpMethod.GET,
+	            request,
+	            String.class
+	        );
+
+	        responseBody = response.getBody(); // Assign raw JSON response
+	        logger.info("Response body: {}", responseBody);
+	    } catch (RestClientException e) {
+	        logger.error("Error in getCustomerByuserId for ID {}: {}", id, e.getMessage(), e);
+	    }
+
+	    return responseBody; // Return the raw JSON response as String
+	}
 	
+
 	public boolean updateUser(UserResponseDTO user) {
 	    String url = "http://localhost:8081/api/v1/users/"+user.getUserId(); // Adjust the endpoint as needed
 	    logger.info("Updating user with ID: {}", user.getUserId());

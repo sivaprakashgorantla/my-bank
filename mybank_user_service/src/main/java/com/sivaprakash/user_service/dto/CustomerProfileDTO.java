@@ -7,14 +7,14 @@ public class CustomerProfileDTO {
     private String lastName;
     private String mobileNo;
     private String emailId;
-    private String customerId;
+    private Long customerId;
     private ProfileStatus profileStatus;
 	
     public CustomerProfileDTO() {
 		super();
 	}
 
-	public CustomerProfileDTO(String firstName, String lastName, String mobileNo, String emailId, String customerId,
+	public CustomerProfileDTO(String firstName, String lastName, String mobileNo, String emailId, Long customerId,
 			ProfileStatus profileStatus) {
 		super();
 		this.firstName = firstName;
@@ -57,11 +57,11 @@ public class CustomerProfileDTO {
 		this.emailId = emailId;
 	}
 
-	public String getCustomerId() {
+	public Long getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(String customerId) {
+	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
 	}
 
@@ -72,12 +72,5 @@ public class CustomerProfileDTO {
 	public void setProfileStatus(ProfileStatus profileStatus) {
 		this.profileStatus = profileStatus;
 	}
-
-	@Override
-	public String toString() {
-		return "CustomerProfileDTO [firstName=" + firstName + ", lastName=" + lastName + ", mobileNo=" + mobileNo
-				+ ", emailId=" + emailId + ", customerId=" + customerId + ", profileStatus=" + profileStatus + "]";
-	}
-
-    
+   
 }

@@ -1,20 +1,20 @@
 package com.sivaprakash.user_service.dto;
 
 public class CustomerProfileUpdateRequest {
-	private String customerId;
+	private Long customerId;
 	private String username;
 
-	public CustomerProfileUpdateRequest(String customerId, String username) {
+	public CustomerProfileUpdateRequest(Long customerId, String username) {
 		super();
 		this.customerId = customerId;
 		this.username = username;
 	}
 
-	public String getCustomerId() {
+	public Long getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(String customerId) {
+	public void setCustomerId(Long customerId) {
 		this.customerId = customerId;
 	}
 

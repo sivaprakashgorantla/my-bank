@@ -15,6 +15,7 @@ import { AddBeneficiaryComponent } from './beneficiary/add-beneficiary/add-benef
 import { UpdateBeneficiaryComponent } from './beneficiary/update-beneficiary/update-beneficiary.component';
 import { UserOtpValidationComponent } from './user-otp-validation/user-otp-validation.component';
 import { ValidateCustomerComponent } from './validate-customer/validate-customer.component';
+import { PersonComponent } from './person/person/person.component';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,7 @@ export const routes: Routes = [
     ]
   },
   { path: 'login', component: LoginComponent },
+  { path: 'person', component: PersonComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'app-user-otp-validation', component: UserOtpValidationComponent },
   { path: 'forgot-password', component: ForgetpasswordComponent },

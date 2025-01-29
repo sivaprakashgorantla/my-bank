@@ -15,7 +15,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	// Add custom query methods if needed
 	Optional<Customer> findByUser(User user);
 
-	Optional<Customer> findByCustomerId(String customerId);
+	Optional<Customer> findByCustomerId(Long customerId);
 	
 	@Query("SELECT c.customerId FROM Customer c WHERE c.user.id = :userId")
 	Optional<String> findCustomerIdByUserId(@Param("userId") Long userId);
