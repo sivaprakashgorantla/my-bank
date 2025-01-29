@@ -29,9 +29,6 @@ public class AuthService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
-
 	private static final int OTP_EXPIRATION_MINUTES = 30;
 
 	public UserResponseDTO validateUser(LoginRequestDTO loginRequest) {
@@ -71,30 +68,29 @@ public class AuthService {
 		return userResponseDTO;
 	}
 
-	public void sendOtp(String phoneNumber, String email) {
-		// Generate OTP
-		String otp = generateOtp();
-
-		// Store OTP in Redis with expiration
-		redisTemplate.opsForValue().set("OTP_" + phoneNumber, otp, OTP_EXPIRATION_MINUTES, TimeUnit.MINUTES);
-
-		// Mock sending OTP via email and SMS
-		logger.info("Sending OTP '{}' to phone: {} and email: {}", otp, phoneNumber, email);
-
-		// Use an actual email or SMS service to send the OTP here
-	}
-
-	public boolean validateOtp(String phoneNumber, String otp) {
-		String storedOtp = redisTemplate.opsForValue().get("OTP_" + phoneNumber);
-
-		if (storedOtp != null && storedOtp.equals(otp)) {
+//	public void sendOtp(String phoneNumber, String email) {
+//		// Generate OTP
+//		String otp = generateOtp();
+//
+//		// Store OTP in Redis with expiration
+//	//	redisTemplate.opsForValue().set("OTP_" + phoneNumber, otp, OTP_EXPIRATION_MINUTES, TimeUnit.MINUTES);
+//
+//		// Mock sending OTP via email and SMS
+//		logger.info("Sending OTP '{}' to phone: {} and email: {}", otp, phoneNumber, email);
+//
+//		// Use an actual email or SMS service to send the OTP here
+//	}
+//
+	public boolean validateOtp(String userOtp, String otp) {
+		
+		if (userOtp != null && otp!=null  && userOtp.equals(otp)) {
 			// OTP is valid; remove from Redis
-			redisTemplate.delete("OTP_" + phoneNumber);
-			logger.info("OTP validated successfully for phone: {}", phoneNumber);
+			//redisTemplate.delete("OTP_" + phoneNumber);
+			logger.info("OTP validated successfully for phone: {}", userOtp);
 			return true;
 		}
 
-		logger.warn("Invalid OTP '{}' for phone: {}", otp, phoneNumber);
+		logger.warn("Invalid OTP '{}' for phone: {}", otp, userOtp);
 		return false;
 	}
 

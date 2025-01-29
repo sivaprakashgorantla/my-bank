@@ -71,8 +71,8 @@ public class AuthController {
 
             if (user != null) {
                 // Send OTP to both mobile and email
-                authService.sendOtp(String.valueOf(user.getPhoneNumber()), user.getEmail());
-                System.out.println("Registered user id :" + user.getUserId());
+                //authService.sendOtp(String.valueOf(user.getPhoneNumber()), user.getEmail());
+                System.out.println("Registered otp :" + user.getOtp());
 
                 // Create a JSON response as a Map
                 Map<String, Object> response = new HashMap<>();
@@ -105,7 +105,7 @@ public class AuthController {
             }
 
             // Validate the OTP
-            boolean isOtpValid = authService.validateOtp(String.valueOf(user.getPhoneNumber()), otpValidateRequest.getOtp());
+            boolean isOtpValid = authService.validateOtp(String.valueOf(user.getOtp()), otpValidateRequest.getOtp());
             if (isOtpValid) {
                 // Update user status
                 user.setStatus("ACTIVE");

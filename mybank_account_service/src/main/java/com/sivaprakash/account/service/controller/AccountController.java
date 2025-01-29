@@ -93,7 +93,7 @@ public class AccountController {
 	}
 
 	@GetMapping("/all")
-	public ResponseEntity<AccountResponseDTO> getAccounts() {
+	public ResponseEntity<List<AccountDetailsDTO>> getAccounts() {
 	    logger.info("Fetching all accounts.");
 
 	    try {
@@ -102,14 +102,13 @@ public class AccountController {
 
 	        if (accounts.isEmpty()) {
 	            logger.warn("No accounts found.");
-	            return ResponseEntity.ok().body(new AccountResponseDTO("No accounts found.", null));
+	            return ResponseEntity.ok().body(List.of()); // Return an empty list instead of null
 	        }
 
-	        return ResponseEntity.ok().body(new AccountResponseDTO("Accounts retrieved successfully", accounts));
+	        return ResponseEntity.ok().body(accounts);
 	    } catch (Exception e) {
 	        logger.error("Error occurred while fetching all accounts: {}", e.getMessage(), e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(new AccountResponseDTO("Error fetching accounts.", null));
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 	    }
 	}
 	

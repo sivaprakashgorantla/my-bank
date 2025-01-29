@@ -43,17 +43,17 @@ public class UserController {
         User user = userService.validateUser(loginRequest.getUsername());
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             Long customerId = userService.getCustomeByUserId(user.getUserId());
-            UserResponseDTO response = new UserResponseDTO(
-                    user.getUserId(),
-                    user.getUsername(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    null, // Exclude password
-                    user.getEmail(),
-                    customerId != null ? customerId.toString() : null,
-                    user.getPhoneNumber(),
-                    user.getStatus().toString()
-            );
+            UserResponseDTO response = new UserResponseDTO();
+            response.setUserId(user.getUserId());
+            response.setFirstName(user.getFirstName());
+            response.setLastName(user.getLastName());
+            response.setUsername(user.getUsername());
+            response.setPhoneNumber(user.getPhoneNumber());
+            response.setEmail(user.getEmail());
+            response.setStatus(user.getStatus().toString());
+            response.setDateOfBirth(user.getDateOfBirth().toString());
+            response.setAddress(user.getAddress()); 
+            response.setCreatedAt(customerId != null ? customerId.toString() : null);
             logger.info("User validated successfully: {}", user.getUsername());
             return ResponseEntity.ok(response);
         }
@@ -102,28 +102,39 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-//
-//    @GetMapping("/customer/{customerId}")
-//    public ResponseEntity<?> getUserByCustomerId(@PathVariable String customerId) {
-//        logger.info("Fetching user by customerId: {}", customerId);
-//        try {
-//            return ResponseEntity.ok(userService.getUserByCustomerId(customerId));
-//        } catch (IllegalArgumentException e) {
-//            logger.error("Failed to fetch user by customerId: {}. Error: {}", customerId, e.getMessage());
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
 
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable Long userId) {
         logger.info("Fetching user by userId: {}", userId);
         try {
-            return ResponseEntity.ok(userService.getUserById(userId));
+            User user = userService.getUserById(userId);
+
+            // Mask email
+            String maskedEmail = userService.maskEmail(user.getEmail());
+
+            // Mask phone number
+            String maskedPhone = userService.maskPhoneNumber(user.getPhoneNumber());
+
+            // Create a response DTO to exclude password and include masked email & phone
+            UserResponseDTO response = new UserResponseDTO();
+            response.setUserId(userId);
+            response.setFirstName(user.getFirstName());
+            response.setLastName(user.getLastName());
+            response.setUsername(user.getUsername());
+            response.setPhoneNumber(maskedPhone);
+            response.setEmail(maskedEmail);
+            response.setRole(user.getRole().toString());
+            response.setStatus(user.getStatus().toString());
+            response.setDateOfBirth(user.getDateOfBirth().toString());
+            response.setAddress(user.getAddress());
+                        logger.info("User fetched successfully with masked data for userId: {}", userId);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("Failed to fetch user by userId: {}. Error: {}", userId, e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUserById(@PathVariable Long userId) {

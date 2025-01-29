@@ -10,9 +10,14 @@ public class UserResponseDTO {
 	private String customerId;
 	private Long phoneNumber;
 	private String status;
+	private String otp;
+
+	public UserResponseDTO() {
+		super();
+	}
 
 	public UserResponseDTO(Long userId, String username, String firstName, String lastName, String password,
-			String email, String customerId, Long phoneNumber, String status) {
+			String email, String customerId, Long phoneNumber, String status, String otp) {
 		super();
 		this.userId = userId;
 		this.username = username;
@@ -23,6 +28,7 @@ public class UserResponseDTO {
 		this.customerId = customerId;
 		this.phoneNumber = phoneNumber;
 		this.status = status;
+		this.otp = otp;
 	}
 
 	public Long getUserId() {
@@ -97,12 +103,12 @@ public class UserResponseDTO {
 		this.status = status;
 	}
 
-	@Override
-	public String toString() {
-		return "UserResponseDTO [userId=" + userId + ", username=" + username + ", firstName=" + firstName
-				+ ", lastName=" + lastName + ", password=" + password + ", email=" + email + ", customerId="
-				+ customerId + ", phoneNumber=" + phoneNumber + ", status=" + status + "]";
+	public String getOtp() {
+		return otp;
 	}
 
-	
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.sivaprakash.user_service.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sivaprakash.user_service.entity.Customer;
 import com.sivaprakash.user_service.entity.User;
+import com.sivaprakash.user_service.enums.ProfileStatus;
 import com.sivaprakash.user_service.repository.UserRepository;
 
 @Service
@@ -36,13 +38,19 @@ public class UserService {
     }
 
     // Generate and save OTP in the database
-    private String generateAndSaveOtp(User user) {
-        String otp = generateOtp();
-        user.setOtp(otp);
-        userRepository.save(user);
-        logger.info("Generated OTP: {} for user: {}", otp, user.getUsername());
-        return otp;
+ // Generate and save OTP in the database with exception handling
+    private User generateAndSaveOtp(User user) {
+        try {
+            String otp = generateOtp();
+            user.setOtp(otp);
+            userRepository.save(user);
+            logger.info("Generated OTP: {} for user: {}", otp, user.getUsername());
+        } catch (Exception e) {
+            logger.error("Failed to generate and save OTP for user: {}. Error: {}", user.getUsername(), e.getMessage());
+        }
+        return user;
     }
+
 
     // Generate a 6-digit OTP
     private String generateOtp() {
@@ -66,9 +74,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
 
-        generateAndSaveOtp(savedUser);
+        User generateAndSaveOtp = generateAndSaveOtp(savedUser);
         logger.info("User registered successfully: {}", savedUser.getUsername());
-        return savedUser;
+        return generateAndSaveOtp;
     }
 
     // Verify OTP
@@ -102,16 +110,29 @@ public class UserService {
             return Optional.empty();
         }
     }
-
-    // Update user information
+ // Update user information
     public User updateUser(User updateUser) {
         logger.info("Updating user with ID: {}", updateUser.getUserId());
 
         User user = userRepository.findById(updateUser.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> {
+                    logger.error("User not found with ID: {}", updateUser.getUserId());
+                    return new IllegalArgumentException("User not found");
+                });
 
         BeanUtils.copyProperties(updateUser, user, "userId", "password");
+        user.setUpdatedAt(LocalDateTime.now());
         User updatedUser = userRepository.save(user);
+
+        try {
+            Customer customer = customerService.getCustomerByUserId(updatedUser.getUserId());
+            customer.setProfileStatus(ProfileStatus.VERIFIED);
+            customerService.updateCustomer(customer);
+            logger.info("Customer updated successfully for user ID: {}", updatedUser.getUserId());
+        } catch (Exception e) {
+            logger.error("Failed to update customer for user ID: {}. Error: {}", updatedUser.getUserId(), e.getMessage());
+            throw new RuntimeException("Failed to update customer profile", e);
+        }
 
         logger.info("User updated successfully with ID: {}", updatedUser.getUserId());
         return updatedUser;
@@ -123,13 +144,6 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
-//
-//    // Fetch user by customer ID
-//    public User getUserByCustomerId(String customerId) {
-//        logger.info("Fetching user by customer ID: {}", customerId);
-//        return customerService.getCustomerIdByUserId(customerId)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//    }
 
     // Delete user by ID
     public void deleteUserById(Long userId) {
@@ -155,7 +169,7 @@ public class UserService {
     public boolean createCustomer(Long userId) {
         logger.info("Creating customer for user ID: {}", userId);
         try {
-            Customer customer = customerService.createCustmer(userId);
+            Customer customer = customerService.createCustomer(userId);
             logger.info("Customer created successfully for user ID: {}", userId);
             return customer != null;
         } catch (Exception e) {
@@ -176,4 +190,29 @@ public class UserService {
             throw new RuntimeException("Failed to fetch customer for user ID: " + userId, e);
         }
     }
+    
+    
+    // Method to mask email
+    public String maskEmail(String email) {
+        if (email == null || !email.contains("@")) return "*****";
+        
+        String[] parts = email.split("@");
+        String firstPart = parts[0];
+        String domain = parts[1];
+
+        if (firstPart.length() <= 2) {
+            return firstPart.charAt(0) + "*****@" + domain;
+        }
+
+        return firstPart.charAt(0) + "*****" + firstPart.charAt(firstPart.length() - 1) + "@" + domain;
+    }
+
+    // Method to mask phone number
+    public  String maskPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.length() < 4) return "*****";
+        
+        return "*******" + phoneNumber.substring(phoneNumber.length() - 4);
+    }
+
+
 }
