@@ -1,5 +1,6 @@
 <p>add-beneficiary works!</p>
-<form [formGroup]="beneficiaryForm" (ngSubmit)="onSubmit()">
+<div class="container" >
+<form  [formGroup]="beneficiaryForm" (ngSubmit)="onSubmit()">
   
     <!-- Beneficiary Name -->
     <div>
@@ -73,3 +74,4 @@
       <button type="button" (click)="resetForm()">Reset</button>
     </div>
   </form>
+</div>
