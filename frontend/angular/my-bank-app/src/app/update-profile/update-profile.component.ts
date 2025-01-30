@@ -37,9 +37,11 @@ export class UpdateProfileComponent implements OnInit {
   };
 
   statuses = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
+  otpSent: boolean = false;  // Flag to check if OTP is sent
+  otp: string = '';  // For storing OTP input
   roles = ['ADMIN', 'USER', 'MODERATOR'];
 
-  constructor(private userService: UserService, private router:Router) { }
+  constructor(private userService: UserService, private router: Router) {}
 
   ngOnInit(): void {
     this.fetchUserProfile();
@@ -53,6 +55,38 @@ export class UpdateProfileComponent implements OnInit {
       },
       (error) => {
         console.error('Error fetching user profile:', error);
+      }
+    );
+  }
+
+  // Send OTP logic
+  sendOtp() {
+    console.log('Sending OTP for user:', this.user.userId);
+    this.userService.sendOtp(this.user.userId).subscribe(
+      (response: any) => {
+        console.log('OTP sent successfully:', response);
+        this.otpSent = true; // Make fields read-only
+        alert('OTP sent successfully!'+response.otp);
+        this.user.otp = response.otp; // Set the OTP value
+      },
+      (error: any) => {
+        console.error('Error sending OTP:', error);
+        alert('Error sending OTP!');
+      }
+    );
+  }
+  // OTP Validation logic
+  validateOtp() {
+    console.log('Validating OTP:', this.otp);
+    this.userService.validateOtp(this.user.userId, this.otp).subscribe(
+      (response: any) => {
+        console.log('OTP validated successfully:', response);
+        alert('OTP validated successfully!');
+        //this.router.navigate(['/dashboard']);
+      },
+      (error: any) => {
+        console.error('Error validating OTP:', error);
+        alert('Error validating OTP!');
       }
     );
   }

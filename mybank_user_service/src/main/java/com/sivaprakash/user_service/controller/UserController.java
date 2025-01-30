@@ -1,17 +1,29 @@
 package com.sivaprakash.user_service.controller;
 
-import com.sivaprakash.user_service.dto.LoginRequestDTO;
-import com.sivaprakash.user_service.dto.UserResponseDTO;
-import com.sivaprakash.user_service.entity.User;
-import com.sivaprakash.user_service.service.UserService;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import com.sivaprakash.user_service.dto.LoginRequestDTO;
+import com.sivaprakash.user_service.dto.UserResponseDTO;
+import com.sivaprakash.user_service.entity.User;
+import com.sivaprakash.user_service.service.UserService;
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -22,6 +34,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
     @PostMapping("/register")
@@ -75,6 +89,22 @@ public class UserController {
             }
         } catch (IllegalArgumentException e) {
             logger.error("Error fetching user: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    
+
+
+    @PostMapping("/profile-verify-otp")
+    public ResponseEntity<?> profileVerifyOtp(@RequestBody Map<String, Long> request) {
+    	Long userId = request.get("userId");
+    	String otp = request.get("otp").toString();
+        logger.info("Verifying OTP for userID: {}", userId);
+        try {
+            return ResponseEntity.ok(userService.verifyOtp(userId, otp));
+        } catch (IllegalArgumentException e) {
+            logger.error("OTP verification failed for username: {}. Error: {}", userId, e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -159,6 +189,40 @@ public class UserController {
         } else {
             logger.warn("User not found for username: {}", username);
             return ResponseEntity.status(404).body("User not found");
+        }
+    }
+    
+    @PostMapping("/send-otp")
+    public ResponseEntity<Map<String, Object>> sendOtp(@RequestBody Map<String, Long> request) {
+        Long userId = request.get("userId");
+        logger.info("Request to send OTP to user: {}", userId);
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Validate the user
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                logger.warn("User not found for userId: {}", userId);
+                response.put("status", "error");
+                response.put("message", "User not found.");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Generate and save OTP for the user
+            User updatedUser = userService.generateAndSaveOtp(user);
+
+            logger.info("OTP generated and saved for user: {}", userId);
+            response.put("status", "success");
+            response.put("message", "OTP sent successfully.");
+            response.put("otp", updatedUser.getOtp());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to send OTP for userId: {}. Error: {}", userId, e.getMessage());
+            response.put("status", "error");
+            response.put("message", "Failed to send OTP.");
+            return ResponseEntity.status(500).body(response);
         }
     }
 }

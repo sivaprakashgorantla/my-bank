@@ -16,54 +16,102 @@ export class UserService {
   constructor(private http: HttpClient, private router: Router) {}
 
   getUserProfile(): Observable<any> {
-    const userId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage
-    const token = localStorage.getItem('auth-token'); // Retrieve the JWT token from localStorage
-    console.log('Token in getUserProfile:', token); // Debugging token retrieval
-    console.log('userId in getUserProfile:', userId); // Debugging userId retrieval
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('auth-token');
     if (!token) {
       console.error('JWT token is not available in localStorage');
       throw new Error('User is not authenticated');
     }
 
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`, // Add the Authorization header
+      Authorization: `Bearer ${token}`,
     });
     return this.http.get<any>(`${this.userApiUrl}${userId}`, { headers });
   }
 
   updateUserProfile(profile: any): Observable<any> {
-    // Retrieve the userId and token from localStorage
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('auth-token');
-  
-    if (!userId) {
-      console.error('User ID is missing in localStorage');
-      return throwError(() => new Error('User ID is not available.'));
+
+    if (!userId || !token) {
+      console.error('User ID or JWT token is missing in localStorage');
+      return throwError(() => new Error('User is not authenticated.'));
     }
-  
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+
+    return this.http
+      .put<any>(`${this.userApiUrl}${userId}`, profile, { headers })
+      .pipe(
+        tap(() => {
+          console.log('updateUserProfile successful for userId:', userId);
+        }),
+        catchError((error) => {
+          console.error('Error updating user profile:', error);
+          return throwError(() => new Error('Failed to update user profile.'));
+        })
+      );
+  }
+
+  // Send OTP to the user (Email/Phone)
+  sendOtp(userId: number): Observable<any> {
+    const token = localStorage.getItem('auth-token');
     if (!token) {
       console.error('JWT token is not available in localStorage');
       return throwError(() => new Error('User is not authenticated.'));
     }
-  
-    // Configure HTTP headers
+
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`, // Attach token in Authorization header
-      'Content-Type': 'application/json', // Ensure the correct Content-Type header
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     });
-  
-    // Make the HTTP PUT request
-    return this.http.put<any>(`${this.userApiUrl}${userId}`, profile, { headers }).pipe(
-      tap(() => {
-        console.log('updateUserProfile successful for userId:', userId); // Debugging success
+
+    return this.http.post<any>(
+      `${this.userApiUrl}send-otp`,
+      { userId },
+      { headers }
+    ).pipe(
+      tap((response) => {
+        console.log('OTP sent successfully:', response);
       }),
       catchError((error) => {
-        console.error('Error updating user profile:', error);
-        return throwError(() => new Error('Failed to update user profile.'));
+        console.error('Error sending OTP:', error);
+        return throwError(() => new Error('Failed to send OTP.'));
       })
     );
   }
-  
+
+  // Validate the OTP entered by the user
+  validateOtp(userId: number, otp: string): Observable<any> {
+    const token = localStorage.getItem('auth-token');
+    if (!token) {
+      console.error('JWT token is not available in localStorage');
+      return throwError(() => new Error('User is not authenticated.'));
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post<any>(
+      `${this.userApiUrl}profile-verify-otp`,
+      { userId, otp },
+      { headers ,responseType: 'text' as 'json'},
+
+    ).pipe(
+      tap((response) => {
+        console.log('OTP validated successfully:', response);
+      }),
+      catchError((error) => {
+        console.error('Error validating OTP:', error);
+        return throwError(() => new Error('Failed to validate OTP.'));
+      })
+    );
+  }
 
   // Save the JWT token to local storage
   saveToken(token: string): void {
@@ -73,7 +121,6 @@ export class UserService {
   // Retrieve the JWT token from local storage
   getToken(): string | null {
     const token = localStorage.getItem(this.tokenKey);
-    console.log('Retrieved token:', token); // Debugging token retrieval
     return token;
   }
 
@@ -94,30 +141,18 @@ export class UserService {
 
   // Decode and check token expiration
   private isTokenExpired(token: string): boolean {
-    return true;
+    return true;  // Implement token expiration check if needed
   }
 
   // Handle errors and return an observable with a user-friendly message
   private handleError(error: any): Observable<never> {
-    console.error('AuthService Error:', error);
-
-    let errorMessage =
-      'An error occurred during authentication. Please try again later.';
-
+    let errorMessage = 'An error occurred during authentication. Please try again later.';
     if (error.status === 0) {
       errorMessage = 'Network error. Please check your internet connection.';
     } else if (error.status === 401) {
-      errorMessage =
-        'Invalid credentials. Please check your email and password.';
-    } else if (error.status === 400) {
-      errorMessage = 'Invalid input. Please check the registration details.';
+      errorMessage = 'Invalid credentials. Please check your email and password.';
     }
-
     alert(errorMessage);
-    return throwError(errorMessage); // Return an observable with the error message
+    return throwError(errorMessage);
   }
-
-  // validateCustomer() {
-  //   console.log('Validating customer...');
-  // }
 }
