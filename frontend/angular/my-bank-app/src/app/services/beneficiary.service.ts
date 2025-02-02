@@ -26,8 +26,8 @@ export class BeneficiaryService {
       Authorization: `Bearer ${token}`,
     });
 
-    const userId = localStorage.getItem('userId');
-    return this.http.get<any[]>(`${this.baseUrl}${userId}`, { headers });
+    const customerId = localStorage.getItem('customerId');
+    return this.http.get<any[]>(`${this.baseUrl}${customerId}`, { headers });
   }
 
   // Add a new beneficiary

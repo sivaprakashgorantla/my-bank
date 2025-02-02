@@ -3,33 +3,47 @@ package com.sivaprakash.auth_service.dto;
 public class UserResponseDTO {
 	private Long userId;
 	private String username;
-	private String firstName;
-	private String lastName;
 	private String password;
 	private String email;
-	private String customerId;
-	private Long phoneNumber;
-	private String status;
+	private String phoneNumber;
+	private String firstName;
+	private String lastName;
+	private String dateOfBirth;
+	private String address;
 	private String otp;
+	private String createdAt;
+	private String updatedAt;
+	private String status;
+	private String role; // Default role
+	private String customerId;
+
 
 	public UserResponseDTO() {
 		super();
 	}
 
-	public UserResponseDTO(Long userId, String username, String firstName, String lastName, String password,
-			String email, String customerId, Long phoneNumber, String status, String otp) {
+
+	public UserResponseDTO(Long userId, String username, String password, String email, String phoneNumber,
+			String firstName, String lastName, String dateOfBirth, String address, String otp, String createdAt,
+			String updatedAt, String status, String role, String customerId) {
 		super();
 		this.userId = userId;
 		this.username = username;
-		this.firstName = firstName;
-		this.lastName = lastName;
 		this.password = password;
 		this.email = email;
-		this.customerId = customerId;
 		this.phoneNumber = phoneNumber;
-		this.status = status;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.dateOfBirth = dateOfBirth;
+		this.address = address;
 		this.otp = otp;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.status = status;
+		this.role = role;
+		this.customerId = customerId;
 	}
+
 
 	public Long getUserId() {
 		return userId;
@@ -45,22 +59,6 @@ public class UserResponseDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getPassword() {
@@ -79,28 +77,44 @@ public class UserResponseDTO {
 		this.email = email;
 	}
 
-	public String getCustomerId() {
-		return customerId;
-	}
-
-	public void setCustomerId(String customerId) {
-		this.customerId = customerId;
-	}
-
-	public Long getPhoneNumber() {
+	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
-	public void setPhoneNumber(Long phoneNumber) {
+	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(String dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getOtp() {
@@ -111,4 +125,54 @@ public class UserResponseDTO {
 		this.otp = otp;
 	}
 
+	public String getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public String getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(String updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public String getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+
+	@Override
+	public String toString() {
+		return "UserResponseDTO [userId=" + userId + ", username=" + username + ", password=" + password + ", email="
+				+ email + ", phoneNumber=" + phoneNumber + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", dateOfBirth=" + dateOfBirth + ", address=" + address + ", otp=" + otp + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + ", status=" + status + ", role=" + role + ", customerId=" + customerId
+				+ "]";
+	}
+
+	
 }

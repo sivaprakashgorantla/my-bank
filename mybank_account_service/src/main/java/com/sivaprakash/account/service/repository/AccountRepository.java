@@ -12,7 +12,7 @@ import com.sivaprakash.account.service.entiry.Account;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
 	
-	List<Account> findByCustomerId(String customerId);
+	List<Account> findByCustomerId(Long customerId);
 
 	List<Account> findByaccountNumber(String accountNumber);
 

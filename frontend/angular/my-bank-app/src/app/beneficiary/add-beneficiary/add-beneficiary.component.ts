@@ -48,7 +48,7 @@ export class AddBeneficiaryComponent implements OnInit {
       beneficiaryType: 'INTERNAL',
       relationship: '',
       dailyTransferLimit: null,
-      userId: localStorage.getItem('userId')!,
+      customerId: localStorage.getItem('customerId')!,
     };
   }
 
@@ -76,7 +76,7 @@ export class AddBeneficiaryComponent implements OnInit {
       } else {
         // Add new beneficiary
         this.beneficiary = this.beneficiaryForm.value;
-        console.log('Beneficiary user id:', this.beneficiary.userId);
+        console.log('Beneficiary customerId id:', this.beneficiary.customerId);
         this.beneficiaryService.addBeneficiary(this.beneficiary).subscribe(
           () => {
             this.loadBeneficiaries();

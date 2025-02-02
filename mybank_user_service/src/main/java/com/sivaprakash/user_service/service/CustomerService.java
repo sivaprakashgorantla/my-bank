@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sivaprakash.user_service.client.AccountFeignClient;
 import com.sivaprakash.user_service.dto.CustomerDTO;
 import com.sivaprakash.user_service.dto.CustomerProfileDTO;
 import com.sivaprakash.user_service.dto.CustomerProfileUpdateRequest;
@@ -33,6 +35,9 @@ public class CustomerService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountFeignClient accountFeignClient;
+    
     private static final int OTP_EXPIRATION_MINUTES = 30;
 
     @Transactional(readOnly = true)
@@ -105,7 +110,13 @@ public class CustomerService {
         Customer customer = new Customer();
         customer.setUser(user);
         Customer savedCustomer = customerRepository.save(customer);
-
+        
+        boolean flag = accountFeignClient.createAccount(savedCustomer.getCustomerId());
+        logger.info("Account  created successfully for user ID: {}", flag);
+        if(!flag) {
+        	System.out.println("flag :"+flag);
+        }
+        
         logger.info("Customer created successfully for user ID: {}", userId);
         return savedCustomer;
     }

@@ -2,6 +2,7 @@ package com.sivaprakash.user_service.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -68,14 +69,18 @@ public class User {
 		this.createdAt = LocalDateTime.now();
 	}
 
-	
 	public User() {
 		super();
 	}
 
+	public User(Long userId, String username, String firstName, String email, String phoneNumber) {
+		this.username = username;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
+		this.firstName = firstName;
+	}
 
-	
-	public User(String username, String password,  String firstName, String lastName, String email, String phoneNumber) {
+	public User(String username, String password, String firstName, String lastName, String email, String phoneNumber) {
 		super();
 		this.username = username;
 		this.password = password;
@@ -84,7 +89,6 @@ public class User {
 		this.firstName = firstName;
 		this.lastName = lastName;
 	}
-
 
 	public User(Long userId, String username, String password, String email, String phoneNumber, String firstName,
 			String lastName, LocalDate dateOfBirth, String address, String otp, LocalDateTime createdAt,
@@ -163,7 +167,7 @@ public class User {
 	}
 
 	public LocalDate getDateOfBirth() {
-		return dateOfBirth;
+		return (dateOfBirth != null) ? dateOfBirth : LocalDate.now();
 	}
 
 	public void setDateOfBirth(LocalDate dateOfBirth) {
@@ -217,17 +221,23 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
+
+	public enum Role {
+		ADMIN, USER, MODERATOR
+	}
+
+	public enum UserStatus {
+		ACTIVE, INACTIVE, SUSPENDED
+	}
+
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", username=" + username + ", password=" + password + ", email=" + email
+				+ ", phoneNumber=" + phoneNumber + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", dateOfBirth=" + dateOfBirth + ", address=" + address + ", otp=" + otp + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + ", status=" + status + ", role=" + role + "]";
+	}
+
 	
-	 public enum Role {
-	        ADMIN, USER, MODERATOR
-	    }
-
-	    public enum UserStatus {
-	        ACTIVE, INACTIVE, SUSPENDED
-	    }
-	    
-	    
-
-	// Constructors, getters, setters, toString methods
 
 }

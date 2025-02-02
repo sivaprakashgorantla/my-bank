@@ -82,7 +82,7 @@ public class BeneficiaryDataInitializer {
 
     // Define the method to create a Beneficiary object
     private Beneficiary createBeneficiary(
-            Long userId, 
+            Long constumerId, 
             String accountNumber, 
             String bankCode,
             String name,
@@ -94,7 +94,7 @@ public class BeneficiaryDataInitializer {
             LocalDateTime timestamp) {
 
         return new Beneficiary(
-            userId, // Pass the actual userId here
+        		constumerId, // Pass the actual userId here
             accountNumber, // Pass the actual account number here
             bankCode, // Pass the actual bank code here
             name,

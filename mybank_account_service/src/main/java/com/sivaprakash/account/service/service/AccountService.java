@@ -9,10 +9,12 @@ public interface AccountService {
 
 	// Create a new account
 	boolean isProfileComplete(Long userId);
+	
+	public AccountDetailsDTO createAccount(Long customerId);
 
 	List<AccountDetailsDTO> getAccountsDetailsByAccountNumber(String accontNumber);
 
-	List<AccountDetailsDTO> getAccountsByUserCustomerId(String customerId);
+	List<AccountDetailsDTO> getAccountsByUserCustomerId(Long customerId);
 
 	boolean updateAccountBalance(String accountNumber, BigDecimal amount, String transactionType);
 

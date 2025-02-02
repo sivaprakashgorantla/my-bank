@@ -54,6 +54,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> validateUser(@RequestBody LoginRequestDTO loginRequest) {
         logger.info("Validating user: {}", loginRequest.getUsername());
 
+        
         User user = userService.validateUser(loginRequest.getUsername());
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             Long customerId = userService.getCustomeByUserId(user.getUserId());
@@ -139,7 +140,7 @@ public class UserController {
         try {
             User user = userService.getUserById(userId);
 
-            // Mask email
+             //Mask email
             String maskedEmail = userService.maskEmail(user.getEmail());
 
             // Mask phone number
@@ -153,6 +154,7 @@ public class UserController {
             response.setUsername(user.getUsername());
             response.setPhoneNumber(maskedPhone);
             response.setEmail(maskedEmail);
+            response.setOtp(user.getOtp());
             response.setRole(user.getRole().toString());
             response.setStatus(user.getStatus().toString());
             response.setDateOfBirth(user.getDateOfBirth().toString());

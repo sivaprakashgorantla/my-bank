@@ -1,6 +1,8 @@
 package com.sivaprakash.account.service.service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import com.sivaprakash.account.service.dto.AccountDetailsDTO;
 import com.sivaprakash.account.service.dto.CustomerProfileDTO;
 import com.sivaprakash.account.service.entiry.Account;
+import com.sivaprakash.account.service.entiry.AccountType;
+import com.sivaprakash.account.service.enums.AccountStatus;
 import com.sivaprakash.account.service.repository.AccountRepository;
 
 @Service
@@ -26,6 +30,8 @@ public class AccountServiceImpl implements AccountService {
 	private AccountRepository accountRepository;
 
 	@Autowired
+	private AccountTypeService accountTypeService;
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Value("${user.service.url}")
@@ -34,6 +40,55 @@ public class AccountServiceImpl implements AccountService {
 	/*
 	 * @Autowired private TransactionClient transactionClient;
 	 */
+
+	@Override
+	public AccountDetailsDTO createAccount(Long customerId) {
+		logger.info("Creating a new account with details: {}", customerId);
+
+		AccountType accountType = accountTypeService.findByTypeName(customerId %2 == 0 ? "CURRENT" : "SAVING");
+
+		// Convert AccountDetailsDTO to Account entity
+		Account account = new Account();
+		account.setAccountNumber(generateAccountNumber()); // You should have a method to generate a unique account
+															// number
+		account.setAccountType(accountType);
+		account.setBalance(generageRamdomValue());
+		account.setCurrencyCode("INR");
+		account.setStatus(AccountStatus.ACTIVE); // Set the default status as active
+		account.setCustomerId(customerId);
+		account.setCreatedAt(LocalDateTime.now());
+		// Save the account to the database
+		Account savedAccount = accountRepository.save(account);
+
+		// Convert the saved account back to DTO
+		return convertToDTO(savedAccount);
+	}
+
+	private BigDecimal generageRamdomValue() {
+		// TODO Auto-generated method stub
+		SecureRandom random = new SecureRandom();
+        BigDecimal min = new BigDecimal("5000");
+        BigDecimal max = new BigDecimal("10000");
+
+        // Generate a random double in range 0.0 to 1.0
+        BigDecimal randomFactor = new BigDecimal(random.nextDouble());
+
+        // Scale to the desired range
+        BigDecimal randomValue = min.add(randomFactor.multiply(max.subtract(min)));
+
+        // Round to 2 decimal places (optional)
+        randomValue = randomValue.setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        System.out.println("Random BigDecimal Value: " + randomValue);
+        return randomValue;
+	}
+
+	private String generateAccountNumber() {
+		// Logic to generate a unique account number, could be based on a sequence or
+		// random generation
+		return "ACC" + System.currentTimeMillis(); // Example
+	}
+
 	public boolean isProfileComplete(Long userId) {
 		logger.info("Checking if profile is complete for userId: {}", userId);
 		try {
@@ -51,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
 		logger.debug("Converting Account entity to DTO for accountId: {}", account.getAccountId());
 		AccountDetailsDTO dto = new AccountDetailsDTO();
 		dto.setAccountId(account.getAccountId());
-		dto.setAccountType(getAccountTypeName(account.getAccountType()));
+		dto.setAccountType(getAccountTypeName(account.getAccountType().getAccountTypeId()));
 		dto.setAccountNumber(account.getAccountNumber());
 		dto.setBalance(account.getBalance());
 		dto.setCurrencyCode(account.getCurrencyCode());
@@ -59,8 +114,12 @@ public class AccountServiceImpl implements AccountService {
 		return dto;
 	}
 
-	private String getAccountTypeName(Integer accountType) {
-		return switch (accountType) {
+	private String getAccountTypeName(Long accountType) {
+		if (accountType == null) {
+			return "Unknown Account Type";
+		}
+
+		return switch (accountType.intValue()) { // Cast Long to int
 		case 1 -> "Savings Account";
 		case 2 -> "Current Account";
 		case 3 -> "Fixed Deposit";
@@ -68,7 +127,7 @@ public class AccountServiceImpl implements AccountService {
 		};
 	}
 
-	public List<AccountDetailsDTO> getAccountsByUserCustomerId(String customerId) {
+	public List<AccountDetailsDTO> getAccountsByUserCustomerId(Long customerId) {
 		logger.info("Fetching accounts for customerId: {}", customerId);
 		List<Account> accounts = accountRepository.findByCustomerId(customerId);
 		logger.debug("Accounts retrieved for customerId {}: {}", customerId, accounts);
@@ -119,17 +178,17 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public List<AccountDetailsDTO> getAccounts() {
-	    logger.info("Fetching all accounts from the database.");
+		logger.info("Fetching all accounts from the database.");
 
-	    try {
-	        List<Account> accounts = accountRepository.findAll();
-	        logger.debug("Accounts retrieved: {}", accounts);
+		try {
+			List<Account> accounts = accountRepository.findAll();
+			logger.debug("Accounts retrieved: {}", accounts);
 
-	        return accounts.stream().map(this::convertToDTO).collect(Collectors.toList());
-	    } catch (Exception e) {
-	        logger.error("Error occurred while fetching accounts: {}", e.getMessage(), e);
-	        throw new RuntimeException("Error fetching accounts.", e);
-	    }
+			return accounts.stream().map(this::convertToDTO).collect(Collectors.toList());
+		} catch (Exception e) {
+			logger.error("Error occurred while fetching accounts: {}", e.getMessage(), e);
+			throw new RuntimeException("Error fetching accounts.", e);
+		}
 	}
 
 }

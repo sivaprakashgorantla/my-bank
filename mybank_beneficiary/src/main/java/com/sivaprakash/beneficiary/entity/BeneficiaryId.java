@@ -10,28 +10,28 @@ public class BeneficiaryId implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Long userId;
+	private Long constumerId;
     private String beneficiaryAccountNumber;
     private String beneficiaryBankCode;
 
     public BeneficiaryId() {
     }
 
-    public BeneficiaryId(Long userId, String beneficiaryAccountNumber, String beneficiaryBankCode) {
-        this.userId = userId;
+    public BeneficiaryId(Long constumerId, String beneficiaryAccountNumber, String beneficiaryBankCode) {
+        this.constumerId = constumerId;
         this.beneficiaryAccountNumber = beneficiaryAccountNumber;
         this.beneficiaryBankCode = beneficiaryBankCode;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public Long getConstumerId() {
+		return constumerId;
+	}
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public void setConstumerId(Long constumerId) {
+		this.constumerId = constumerId;
+	}
 
-    public String getBeneficiaryAccountNumber() {
+	public String getBeneficiaryAccountNumber() {
         return beneficiaryAccountNumber;
     }
 
@@ -52,13 +52,13 @@ public class BeneficiaryId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BeneficiaryId that = (BeneficiaryId) o;
-        return Objects.equals(userId, that.userId) &&
+        return Objects.equals(constumerId, that.constumerId) &&
                 Objects.equals(beneficiaryAccountNumber, that.beneficiaryAccountNumber) &&
                 Objects.equals(beneficiaryBankCode, that.beneficiaryBankCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, beneficiaryAccountNumber, beneficiaryBankCode);
+        return Objects.hash(constumerId, beneficiaryAccountNumber, beneficiaryBankCode);
     }
 }

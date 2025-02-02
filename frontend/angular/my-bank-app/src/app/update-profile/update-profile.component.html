@@ -27,6 +27,7 @@
         name="email"
         [disabled]="otpSent"
         required
+        readonly
       />
     </div>
 
@@ -40,6 +41,7 @@
         [(ngModel)]="user.phoneNumber"
         name="phoneNumber"
         [disabled]="otpSent"
+        readonly
       />
     </div>
 

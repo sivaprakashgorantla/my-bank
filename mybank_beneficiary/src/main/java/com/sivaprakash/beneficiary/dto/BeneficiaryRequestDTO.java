@@ -8,7 +8,7 @@ public class BeneficiaryRequestDTO {
 	private Long beneficiaryId;
 
 	@NotNull(message = "Account ID is required.")
-	private Long userId;
+	private Long customerId;
 
 	@NotBlank(message = "Beneficiary name is required.")
 	@Size(max = 100, message = "Beneficiary name cannot exceed 100 characters.")
@@ -57,12 +57,13 @@ public class BeneficiaryRequestDTO {
 		this.beneficiaryId = beneficiaryId;
 	}
 
-	public Long getUserId() {
-		return userId;
+
+	public Long getCustomerId() {
+		return customerId;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
 
 	public String getBeneficiaryName() {
@@ -148,7 +149,7 @@ public class BeneficiaryRequestDTO {
 
 	@Override
 	public String toString() {
-		return "BeneficiaryRequestDTO [beneficiaryId=" + beneficiaryId + ", userId=" + userId
+		return "BeneficiaryRequestDTO [beneficiaryId=" + beneficiaryId + ", customerId=" + customerId
 				+ ", beneficiaryName=" + beneficiaryName + ", beneficiaryAccountNumber=" + beneficiaryAccountNumber
 				+ ", beneficiaryBankCode=" + beneficiaryBankCode + ", beneficiaryBankName=" + beneficiaryBankName
 				+ ", beneficiaryEmail=" + beneficiaryEmail + ", beneficiaryType=" + beneficiaryType + ", relationship="

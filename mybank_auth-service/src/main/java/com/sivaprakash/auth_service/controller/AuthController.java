@@ -44,12 +44,6 @@ public class AuthController {
             if(user != null) {
             	String customerId = authService.getCustomerByuserId(user.getUserId());
             	System.out.println("customerId 1 : "+customerId);
-            	/*
-				 * boolean isOtpValid =
-				 * userService.validateOtp(String.valueOf(user.getPhoneNumber()),
-				 * loginRequest.getOtp()); if (!isOtpValid) { return
-				 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP"); }
-				 */
             	String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId());
                 return ResponseEntity.ok(new AuthResponseDTO(token,user.getUserId(),user.getUsername(),customerId));
             }
@@ -100,19 +94,25 @@ public class AuthController {
         try {
             // Fetch the user by ID
             UserResponseDTO user = authService.getUserById(otpValidateRequest.getUserId());
+            logger.info("validateOtp UserResponseDTO from database user ",user);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
             }
 
+            logger.info("user.getOtp() : ",user.getOtp());
             // Validate the OTP
             boolean isOtpValid = authService.validateOtp(String.valueOf(user.getOtp()), otpValidateRequest.getOtp());
             if (isOtpValid) {
                 // Update user status
                 user.setStatus("ACTIVE");
-                boolean isUpdated = authService.updateUser(user);
-
-                if (isUpdated) {
-                	authService.createCustomer(user.getUserId());
+                boolean isUpdatedUser = authService.updateUser(user);
+                
+                if (isUpdatedUser) {
+                	String customerId = authService.createCustomer(user.getUserId());
+                	logger.info("Customer created :",customerId);
+                	// impliment account using feign client
+                //	boolean isAccountCreated = authService.createAccount(customerId);
+                //	logger.info("isAccountCreated",isAccountCreated);
                     return ResponseEntity.ok("OTP validated successfully and user status updated to ACTIVE.");
                 } else {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user status.");

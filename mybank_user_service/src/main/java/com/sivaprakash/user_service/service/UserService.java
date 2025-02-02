@@ -1,14 +1,14 @@
 package com.sivaprakash.user_service.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,10 +18,14 @@ import com.sivaprakash.user_service.entity.User;
 import com.sivaprakash.user_service.enums.ProfileStatus;
 import com.sivaprakash.user_service.repository.UserRepository;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @Service
 public class UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+	private static final String USER_SERVICE = "userService";
 
 	@Autowired
 	private UserRepository userRepository;
@@ -129,73 +133,67 @@ public class UserService {
 	}
 
 	// Update user information
-	
+
 	public User updateUser(User updateUser) {
-	    logger.info("Updating user with ID: {}", updateUser.getUserId());
+		logger.info("Updating user with ID: {}", updateUser.getUserId());
 
-	    User user = userRepository.findById(updateUser.getUserId())
-	            .orElseThrow(() -> {
-	                logger.error("User not found with ID: {}", updateUser.getUserId());
-	                return new IllegalArgumentException("User not found");
-	            });
+		User user = userRepository.findById(updateUser.getUserId()).orElseThrow(() -> {
+			logger.error("User not found with ID: {}", updateUser.getUserId());
+			return new IllegalArgumentException("User not found");
+		});
 
-	    // OTP validation
-	    if (user.getOtp() == null || !user.getOtp().equals(updateUser.getOtp())) {
-	        logger.error("OTP verification failed for user: {}. Invalid OTP.", updateUser.getUserId());
-	        throw new IllegalArgumentException("Invalid OTP");
-	    }
+		// OTP validation
+		if (user.getOtp() == null || !user.getOtp().equals(updateUser.getOtp())) {
+			logger.error("OTP verification failed for user: {}. Invalid OTP.", updateUser.getUserId());
+			throw new IllegalArgumentException("Invalid OTP");
+		}
+		
+		
 
+		// Update only non-masked fields
+		if (!isMasked(updateUser.getEmail())) {
+			user.setEmail(updateUser.getEmail());
+		}
 
-	    // Update only non-masked fields
-	    if (!isMasked(updateUser.getEmail())) {
-	        user.setEmail(updateUser.getEmail());
-	    } 
+		if (!isMasked(updateUser.getPhoneNumber())) {
+			user.setPhoneNumber(updateUser.getPhoneNumber());
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		// Update other modifiable fields
+		user.setFirstName(updateUser.getFirstName());
+		user.setLastName(updateUser.getLastName());
+		user.setAddress(updateUser.getAddress());
+		user.setUpdatedAt(LocalDateTime.now());
+		user.setDateOfBirth(formatter !=null ? updateUser.getDateOfBirth():null);
+		user.setRole(updateUser.getRole());
+		user.setStatus(updateUser.getStatus());
 
-	    if (!isMasked(updateUser.getPhoneNumber())) {
-	        user.setPhoneNumber(updateUser.getPhoneNumber());
-	    } 
+		// Clear OTP after successful validation
+		user.setOtp(null);
 
-	    // Update other modifiable fields
-	    user.setFirstName(updateUser.getFirstName());
-	    user.setLastName(updateUser.getLastName());
-	    user.setAddress(updateUser.getAddress());
-	    user.setUpdatedAt(LocalDateTime.now());
-	    user.setDateOfBirth(updateUser.getDateOfBirth());
-	    user.setRole(updateUser.getRole());
-	    user.setStatus(updateUser.getStatus());
-
-	    // Clear OTP after successful validation
-	    user.setOtp(null);
-
-	    
-	    // Save updated user (JPA will update, not insert)
-	    User updatedUser = userRepository.save(user);
-
-	    try {
-	        Customer customer = customerService.getCustomerByUserId(updatedUser.getUserId());
-	        customer.setProfileStatus(ProfileStatus.VERIFIED);
-	        customerService.updateCustomer(customer);
-	        logger.info("Customer updated successfully for user ID: {}", updatedUser.getUserId());
-	    } catch (Exception e) {
-	        logger.error("Failed to update customer for user ID: {}. Error: {}", updatedUser.getUserId(), e.getMessage());
-	        throw new RuntimeException("Failed to update customer profile", e);
-	    }
-
-	    logger.info("User updated successfully with ID: {}", updatedUser.getUserId());
-	    return updatedUser;
+		// Save updated user (JPA will update, not insert)
+		User updatedUser = userRepository.save(user);
+//
+//		try {
+//			Customer customer = customerService.getCustomerByUserId(updatedUser.getUserId());
+//			customer.setProfileStatus(ProfileStatus.VERIFIED);
+//			customerService.updateCustomer(customer);
+//			logger.info("Customer updated successfully for user ID: {}", updatedUser.getUserId());
+//		} catch (Exception e) {
+//			logger.error("Failed to update customer for user ID: {}. Error: {}", updatedUser.getUserId(),
+//					e.getMessage());
+//			throw new RuntimeException("Failed to update customer profile", e);
+//		}
+//
+		logger.info("User updated successfully with ID: {}", updatedUser.getUserId());
+		return updatedUser;
 	}
-
 
 	// Helper method to check if a value is masked
 	private boolean isMasked(String value) {
 		return value != null && (value.contains("*") || value.matches(".*\\*.*"));
 	}
 
-	// Fetch user by ID
-	public User getUserById(Long userId) {
-		logger.info("Fetching user by ID: {}", userId);
-		return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-	}
 
 	// Delete user by ID
 	public void deleteUserById(Long userId) {
@@ -214,19 +212,6 @@ public class UserService {
 	public User validateUser(String username) {
 		logger.info("Validating user by username: {}", username);
 		return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-	}
-
-	// Create a customer for a user
-	public boolean createCustomer(Long userId) {
-		logger.info("Creating customer for user ID: {}", userId);
-		try {
-			Customer customer = customerService.createCustomer(userId);
-			logger.info("Customer created successfully for user ID: {}", userId);
-			return customer != null;
-		} catch (Exception e) {
-			logger.error("Failed to create customer for user ID: {}. Error: {}", userId, e.getMessage());
-			return false;
-		}
 	}
 
 	// Fetch customer by user ID
@@ -266,4 +251,26 @@ public class UserService {
 		return "*******" + phoneNumber.substring(phoneNumber.length() - 4);
 	}
 
+	@CircuitBreaker(name = USER_SERVICE, fallbackMethod = "fallbackGetUserById")
+	public User getUserById(Long userId) {
+	    logger.info("User Service Fetching user by ID: {}", userId);
+	    
+//	    // Simulate failure for circuit breaker testing
+//	    if (Math.random() < 0.5) {
+//	        throw new RuntimeException("Simulated failure");
+//	    }
+
+	    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+	    logger.info("User Service Fetching user by ID: {}", user);
+	    return user;
+	}
+
+
+	public User fallbackGetUserById(Long userId, Throwable throwable) {
+	    logger.warn("Fallback triggered for getUserById. Reason: {}", throwable.getMessage());
+	    return new User(userId, "Fallback User", "N/A", "fallback@example.com", "0000000000");
+	}
+	
+	
 }

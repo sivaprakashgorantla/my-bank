@@ -41,8 +41,7 @@ public class TransactionController {
 		return "Greatings from transactions ";
 	}
 	
-    
-	@GetMapping("/{accountNumber}/recent")
+    @GetMapping("/{accountNumber}/recent")
     public ResponseEntity<TransactionResponseDTO> getRecentTransactions(
             @PathVariable String accountNumber) {
         System.out.println("getRecentTransactions-----------------------------------");
@@ -98,8 +97,9 @@ public class TransactionController {
         toTransaction.setTransactionDate(LocalDateTime.now());
         toTransaction.setDescription("Deposited from "+transferRequest.getSelectedAccount());
         
-        String url = "http://localhost:8082/api/v1/accounts/update-balance";
+        //String url = "http://account-service/api/v1/accounts/update-balance";
         
+        String url = "http://localhost:8082/api/v1/accounts/update-balance";
         // Call the transaction service to perform the transfer
         boolean success = transactionService.processTransfer(fromTransaction,toTransaction);
 
@@ -107,19 +107,25 @@ public class TransactionController {
         
         //restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
  
-//        restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
-
         ResponseEntity<UpdateBalanceResponseDTO> response = restTemplate.exchange(
                 url,
-                HttpMethod.PATCH,
+                HttpMethod.POST,  // Try POST or PUT instead of PATCH
                 new HttpEntity<>(transferRequest),
                 UpdateBalanceResponseDTO.class
-            );
-            
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("Account balance update failed");
-            }
-            
+        );
+        //restTemplate.patchForObject(url, transferRequest, UpdateBalanceResponseDTO.class);
+
+//        ResponseEntity<UpdateBalanceResponseDTO> response = restTemplate.exchange(
+//        	    url,
+//        	    org.springframework.http.HttpMethod.PATCH,
+//        	    new HttpEntity<>(transferRequest),
+//        	    UpdateBalanceResponseDTO.class
+//        	);
+     
+//            if (!response.getStatusCode().is2xxSuccessful()) {
+//                throw new RuntimeException("Account balance update failed");
+//            }
+//            
             TransferResponseDTO transferResponse = new TransferResponseDTO();
             transferResponse.setSuccess(true);
             transferResponse.setMessage("Transfer completed successfully.");

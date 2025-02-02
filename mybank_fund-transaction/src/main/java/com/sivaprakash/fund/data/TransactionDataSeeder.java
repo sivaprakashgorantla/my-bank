@@ -83,7 +83,7 @@ public class TransactionDataSeeder {
 			}
 
 			// Save all transactions
-			transactionRepository.saveAll(transactions);
+			//transactionRepository.saveAll(transactions);
 
 			System.out.println("Finished seeding " + transactions.size() + " transactions");
 		};

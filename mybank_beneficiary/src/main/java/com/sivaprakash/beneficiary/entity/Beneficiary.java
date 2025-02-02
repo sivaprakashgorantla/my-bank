@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "beneficiaries", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id",
+@Table(name = "beneficiaries", uniqueConstraints = @UniqueConstraint(columnNames = { "consumer_id",
 		"beneficiary_account_number", "beneficiary_bank_code" }))
 public class Beneficiary {
 
@@ -16,8 +16,8 @@ public class Beneficiary {
 	@Column(name = "beneficiary_id")
 	private Long beneficiaryId;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
+	@Column(name = "customer_id", nullable = false)
+	private Long customerId;
 
 	@Column(name = "beneficiary_account_number", nullable = false)
 	private String beneficiaryAccountNumber;
@@ -72,11 +72,11 @@ public class Beneficiary {
 	public Beneficiary() {
 	}
 	 // Constructor with fields and LocalDateTime parameters
-    public Beneficiary(Long userId, String beneficiaryAccountNumber, String beneficiaryBankCode, String beneficiaryName,
+    public Beneficiary(Long customerId, String beneficiaryAccountNumber, String beneficiaryBankCode, String beneficiaryName,
                        String beneficiaryBankName, String beneficiaryEmail, BeneficiaryType beneficiaryType, String relationship,
                        BeneficiaryStatus status, BigDecimal dailyTransferLimit, LocalDateTime createdAt, LocalDateTime updatedAt,
                        LocalDateTime lastTransferDate) {
-        this.userId = userId;
+        this.customerId = customerId;
         this.beneficiaryAccountNumber = beneficiaryAccountNumber;
         this.beneficiaryBankCode = beneficiaryBankCode;
         this.beneficiaryName = beneficiaryName;
@@ -99,12 +99,13 @@ public class Beneficiary {
 		this.beneficiaryId = beneficiaryId;
 	}
 
-	public Long getUserId() {
-		return userId;
+
+	public Long getCustomerId() {
+		return customerId;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
 
 	public String getBeneficiaryAccountNumber() {

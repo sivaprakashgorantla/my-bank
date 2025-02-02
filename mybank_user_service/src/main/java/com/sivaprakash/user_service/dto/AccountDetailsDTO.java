@@ -1,4 +1,4 @@
-package com.sivaprakash.account.service.dto;
+package com.sivaprakash.user_service.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
