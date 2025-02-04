@@ -1,6 +1,7 @@
 package com.sivaprakash.beneficiary.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import com.sivaprakash.beneficiary.dto.BeneficiaryResponseDTO;
 import com.sivaprakash.beneficiary.entity.Beneficiary;
 import com.sivaprakash.beneficiary.entity.Beneficiary.BeneficiaryStatus;
 import com.sivaprakash.beneficiary.entity.Beneficiary.BeneficiaryType;
+import com.sivaprakash.beneficiary.exception.ResourceNotFoundException;
 import com.sivaprakash.beneficiary.repository.BeneficiaryRepository;
 
 @Service
@@ -36,7 +38,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
         beneficiary.setBeneficiaryName(request.getBeneficiaryName());
         beneficiary.setBeneficiaryBankName(request.getBeneficiaryBankName());
         beneficiary.setBeneficiaryEmail(request.getBeneficiaryEmail());
-        beneficiary.setBeneficiaryType(BeneficiaryType.EXTERNAL);
+        beneficiary.setBeneficiaryType(request.getBeneficiaryType()=="INTERNAL" ? BeneficiaryType.INTERNAL :BeneficiaryType.EXTERNAL );
         beneficiary.setRelationship(request.getRelationship());
         beneficiary.setStatus(BeneficiaryStatus.ACTIVE);
         beneficiary.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
@@ -60,12 +62,23 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
 
     @Transactional(readOnly = true)
     public List<BeneficiaryResponseDTO> getBeneficiariesByConstomerId(Long customerId) {
-        List<Beneficiary> beneficiaries = beneficiaryRepository.findByCustomerId(customerId);
+        Optional<Beneficiary> beneficiaries = beneficiaryRepository.findByCustomerId(customerId);
         return beneficiaries.stream()
                 .map(b -> convertToDTO(b, "Retrieved successfully"))
                 .collect(Collectors.toList());
     }
 
+
+	@Transactional(readOnly = true)
+	public BeneficiaryResponseDTO getBeneficiaryByCustomerId(Long customerId) {
+		Beneficiary beneficiary = beneficiaryRepository.findByCustomerId(customerId).orElseThrow(
+				() -> new ResourceNotFoundException("No beneficiary found for customer ID: " + customerId));
+
+		return convertToDTO(beneficiary, "Retrieved successfully");
+	}
+
+
+	
     private BeneficiaryResponseDTO convertToDTO(Beneficiary beneficiary, String message) {
         BeneficiaryResponseDTO response = new BeneficiaryResponseDTO();
         response.setBeneficiaryId(beneficiary.getBeneficiaryId());
@@ -90,5 +103,15 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
 	            .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found with ID: " + beneficiaryId));
 	    beneficiaryRepository.delete(beneficiary);
 	}
+
+    @Override
+    public BeneficiaryResponseDTO getBeneficiaryById(Long beneficiaryId) {
+        // Fetch the beneficiary from the database or throw an exception if not found
+        Beneficiary beneficiary = beneficiaryRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found with ID: " + beneficiaryId));
+
+        // Convert the entity to DTO and return
+        return convertToDTO(beneficiary, "Beneficiary retrieved successfully");
+    }
 
 }

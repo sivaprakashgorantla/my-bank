@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +20,6 @@ import com.sivaprakash.account.service.dto.AccountResponseDTO;
 import com.sivaprakash.account.service.dto.TransferRequestDTO;
 import com.sivaprakash.account.service.dto.UpdateBalanceResponseDTO;
 import com.sivaprakash.account.service.service.AccountService;
-
-import jakarta.ws.rs.POST;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
@@ -74,12 +72,13 @@ public class AccountController {
 		return ResponseEntity.ok().body(new AccountResponseDTO("Accounts retrieved successfully", accounts));
 	}
 
-	@PostMapping("/update-balance")
+	@PutMapping("/update-balance")
 	public ResponseEntity<UpdateBalanceResponseDTO> updateAccountBalance(
 			@RequestBody TransferRequestDTO transferRequestDTO) {
 		logger.info("Updating account balances for transfer: {}", transferRequestDTO);
 
 		try {
+			//Account account = accountService.get.
 			boolean debitSuccess = accountService.updateAccountBalance(transferRequestDTO.getSelectedAccount(),
 					transferRequestDTO.getTransferAmount(), "DEBIT");
 

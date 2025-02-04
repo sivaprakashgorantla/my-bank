@@ -71,7 +71,7 @@ public class BeneficiaryDataInitializer {
 
             try {
                 // Save beneficiaries to the repository
-                beneficiaryRepository.saveAll(Arrays.asList(beneficiaries));
+//                beneficiaryRepository.saveAll(Arrays.asList(beneficiaries));
                 System.out.println("Successfully initialized default beneficiaries.");
             } catch (Exception e) {
                 System.err.println("Error initializing beneficiaries: " + e.getMessage());

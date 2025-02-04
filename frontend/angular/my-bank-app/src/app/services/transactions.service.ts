@@ -47,13 +47,13 @@ export class TransactionsService {
     });
   }
 
-  makeTransactions(selectedAccount:string,transferAmount:number,beneficiaryAccountNumber:string): Observable<any> {
+  makeTransactions(selectedAccount:string,transferAmount:number,beneficiaryId:number): Observable<any> {
     // Retrieve the JWT token from localStorage
     const token = localStorage.getItem('auth-token');
     console.log('Token in getTransactionsByAccountNumber:', token); // Debugging token retrieval
     console.log('selectedAccount in makeTransactions:', selectedAccount); // Debugging userId retrieval
     console.log('transferAmount in makeTransactions:', transferAmount); // Debugging userId retrieval
-    console.log('selectedBeneficiary in makeTransactions:', beneficiaryAccountNumber); // Debugging userId retrieval
+    console.log('selectedBeneficiary in beneficiaryId:', beneficiaryId); // Debugging userId retrieval
     if (!token) {
       console.error('JWT token is not available in localStorage');
       throw new Error('User is not authenticated');
@@ -67,7 +67,7 @@ export class TransactionsService {
     const transferPayload = {
       selectedAccount,
       transferAmount,
-      beneficiaryAccountNumber
+      beneficiaryId
     };
     // Return the HTTP GET request with headers
     return this.http.post<any>(`${this.baseUrl}/transfer`, transferPayload,{

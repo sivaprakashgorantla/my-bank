@@ -30,6 +30,7 @@ export class TransactionsComponent implements OnInit {
   beneficiaryAccountNumber: string = '';
   flag: boolean = false;
   isValidAmount: boolean = true;
+  beneficiaryId: number | null = null;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -60,9 +61,10 @@ export class TransactionsComponent implements OnInit {
       if (beneficiary.beneficiaryId == $event) {
         console.log(
           'getBeneficiaryAccountNumber :',
-          beneficiary.beneficiaryAccountNumber
+          beneficiary.beneficiaryId
         );
         this.beneficiaryAccountNumber = beneficiary.beneficiaryAccountNumber;
+        this.beneficiaryId = beneficiary.beneficiaryId;
       }
     });
   }
@@ -125,13 +127,13 @@ export class TransactionsComponent implements OnInit {
       console.log(`Transfer initiated:
         Account Number: ${this.selectedAccount},
         Transfer Amount: ${this.transferAmount},
-        Beneficiary: ${this.selectedBeneficiary}
+        beneficiaryId: ${this.beneficiaryId}
       `);
       this.transactionService
         .makeTransactions(
           this.selectedAccount,
           this.transferAmount,
-          this.beneficiaryAccountNumber
+          this.beneficiaryId !
         )
         .subscribe({
           next: (response) => {

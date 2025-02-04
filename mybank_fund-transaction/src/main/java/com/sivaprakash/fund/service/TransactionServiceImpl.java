@@ -21,30 +21,32 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<TransactionDTO> getLastTenTransactions(String accountNumber) {
-		List<Transaction> transactions = transactionRepository
-				.findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(accountNumber, accountNumber);
-		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
+		List<Transaction> transactions = null;
+//				transactionRepository
+//				.findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(accountNumber, accountNumber);
+//		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
+		return null;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<TransactionDTO> searchTransactions(TransactionSearchCriteria criteria) {
 		List<Transaction> transactions;
-
-		if (criteria.getStartDate() != null && criteria.getEndDate() != null) {
-			transactions = transactionRepository.findByAccountAndDateRange(criteria.getAccountId(),
-					criteria.getStartDate(), criteria.getEndDate());
-		} else if (criteria.getStartDate() != null) {
-			transactions = transactionRepository.findByAccountAndDateFrom(criteria.getAccountId(),
-					criteria.getStartDate());
-		} else if (criteria.getEndDate() != null) {
-			transactions = transactionRepository.findByAccountAndDateTo(criteria.getAccountId(), criteria.getEndDate());
-		} else {
-			transactions = transactionRepository.findByFromAccountNumberOrToAccountNumber(criteria.getAccountId(),
-					criteria.getAccountId());
-		}
-
-		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
+//
+//		if (criteria.getStartDate() != null && criteria.getEndDate() != null) {
+//			transactions = transactionRepository.findByAccountAndDateRange(criteria.getAccountId(),
+//					criteria.getStartDate(), criteria.getEndDate());
+//		} else if (criteria.getStartDate() != null) {
+//			transactions = transactionRepository.findByAccountAndDateFrom(criteria.getAccountId(),
+//					criteria.getStartDate());
+//		} else if (criteria.getEndDate() != null) {
+//			transactions = transactionRepository.findByAccountAndDateTo(criteria.getAccountId(), criteria.getEndDate());
+//		} else {
+//			transactions = transactionRepository.findByFromAccountNumberOrToAccountNumber(criteria.getAccountId(),
+//					criteria.getAccountId());
+//		}
+//
+		return null;//transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	private TransactionDTO convertToDTO(Transaction transaction) {
@@ -58,19 +60,19 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setDescription(transaction.getDescription());
 
 		// Set counterparty details based on transaction type
-		if (transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT
-				|| transaction.getTransactionType() == Transaction.TransactionType.TRANSFER) {
-			dto.setCounterpartyAccountId(transaction.getFromAccountNumber().toString());
-		} else {
-			dto.setCounterpartyAccountId(transaction.getToAccountNumber().toString());
-		}
+//		if (transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT
+//				|| transaction.getTransactionType() == Transaction.TransactionType.TRANSFER) {
+//			dto.setCounterpartyAccountId(transaction.getFromAccountNumber().toString());
+//		} else {
+//			dto.setCounterpartyAccountId(transaction.getToAccountNumber().toString());
+//		}
 
 		return dto;
 	}
 
 	@Override
 	@Transactional
-    public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction) {
+    public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction,String beneficiaryBankCode,String beneficiaryName) {
         try {
             // Save the debit transaction (fromTransaction)
             fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);

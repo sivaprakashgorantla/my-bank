@@ -1,6 +1,6 @@
 package com.sivaprakash.beneficiary.repository;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +14,8 @@ public interface BeneficiaryRepository extends JpaRepository<Beneficiary, Long> 
 
     
     @Query("SELECT b FROM Beneficiary b WHERE b.customerId = :customerId")
-    List<Beneficiary> findByCustomerId(@Param("customerId") Long customerId);
+    //List<Beneficiary> findByCustomerId(@Param("customerId") Long customerId);
+    Optional<Beneficiary> findByCustomerId(Long customerId); // Returns a single record
 
     // Fix the query for checking the account number
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Beneficiary b WHERE b.beneficiaryAccountNumber = :accountNumber")

@@ -72,9 +72,16 @@
     </div>
 
     <!-- Submit and Reset Buttons -->
-    <div style="margin-top: 20px;">
-      <button type="submit" [disabled]="beneficiaryForm.invalid">Save Beneficiary</button>
-      <button type="button" (click)="resetForm()">Reset</button>
+    <div class="flex justify-between mt-4">
+      <button type="submit" [disabled]="beneficiaryForm.invalid"
+              class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:bg-gray-400 transition">
+        Save Beneficiary
+      </button>
+      <button type="button" (click)="resetForm()"
+              class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition">
+        Reset
+      </button>
     </div>
+
   </form>
 </div>

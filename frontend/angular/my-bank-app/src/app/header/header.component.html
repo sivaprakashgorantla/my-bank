@@ -1,4 +1,8 @@
 <div style="background-color: #e94545;display: flex; justify-content: space-between; align-items: center;">
     <h1 class="text-3xl" style="flex-grow: 1; text-align: center;">My Bank- Capstone</h1>
+    <span *ngIf="username" style="margin-right: 20px; color: #f5f2f2; font-family: Verdana, Geneva, Tahoma, sans-serif, Times, serif; font-size: medium; font-weight: bold;">
+        Welcome, {{ username }}
+    </span>
+    
     <a (click)="logout()" style="margin-left: auto;">Logout</a>
 </div>

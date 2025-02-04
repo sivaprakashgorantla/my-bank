@@ -5,10 +5,16 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.sivaprakash.beneficiary.dto.BeneficiaryRequestDTO;
 import com.sivaprakash.beneficiary.dto.BeneficiaryResponseDTO;
@@ -51,7 +57,21 @@ public class BeneficiaryController {
         }
     }
 
-    @GetMapping("/{customerId}")
+    @GetMapping("/beneficiaryId/{beneficiaryId}")
+    public ResponseEntity<BeneficiaryResponseDTO> getBeneficiaryById(@PathVariable Long beneficiaryId) {
+        logger.info("Fetching beneficiary with ID: {}", beneficiaryId);
+        try {
+            BeneficiaryResponseDTO beneficiary = beneficiaryService.getBeneficiaryById(beneficiaryId);
+            logger.info("Successfully retrieved beneficiary: {}", beneficiary);
+            return ResponseEntity.ok(beneficiary);
+        } catch (Exception e) {
+            logger.error("Error retrieving beneficiary with ID {}: {}", beneficiaryId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(new BeneficiaryResponseDTO("ERROR", "Failed to retrieve beneficiary"));
+        }
+    }
+
+    @GetMapping("/customers/{customerId}")
     public ResponseEntity<List<BeneficiaryResponseDTO>> getBeneficiariesByCutstomerId(@PathVariable Long customerId) {
         logger.info("Fetching beneficiaries for customerId: {}", customerId);
         try {

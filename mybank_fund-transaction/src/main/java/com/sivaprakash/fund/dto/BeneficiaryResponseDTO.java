@@ -93,4 +93,13 @@ public class BeneficiaryResponseDTO {
 		this.message = message;
 	}
 
+	@Override
+	public String toString() {
+		return "BeneficiaryResponseDTO [beneficiaryId=" + beneficiaryId + ", beneficiaryName=" + beneficiaryName
+				+ ", beneficiaryAccountNumber=" + beneficiaryAccountNumber + ", beneficiaryBankCode="
+				+ beneficiaryBankCode + ", beneficiaryEmail=" + beneficiaryEmail + ", status=" + status
+				+ ", referenceNumber=" + referenceNumber + ", message=" + message + "]";
+	}
+
+	
 }

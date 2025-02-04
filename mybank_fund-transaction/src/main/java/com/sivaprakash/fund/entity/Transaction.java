@@ -8,17 +8,19 @@ import java.time.LocalDateTime;
 @Table(name = "transactions")
 public class Transaction {
 
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transaction_id_seq")
 	@SequenceGenerator(name = "transaction_id_seq", sequenceName = "transaction_id_seq", allocationSize = 1)
 	private Long transactionId;
 
-	@Column(name = "from_account_number", nullable = false)
+	@Column(name = "account_number", nullable = false)
 	private String fromAccountNumber;
 
-	@Column(name = "to_account_number", nullable = false)
-	private String toAccountNumber;
-
+	/*
+	 * @Column(name = "to_account_number", nullable = false) private String
+	 * toAccountNumber;
+	 */
 	@Column(nullable = false, precision = 15, scale = 2)
 	private BigDecimal amount;
 
@@ -43,20 +45,20 @@ public class Transaction {
 	private String description;
 
 	public enum TransactionType {
-		TRANSFER, DEPOSIT, WITHDRAWAL
+		TRANSFER, DEBIT, CREDIT
 	}
 
 	public Transaction() {
 		super();
 	}
 
-	public Transaction(Long transactionId, String fromAccountNumber, String toAccountNumber, BigDecimal amount,
+	public Transaction(Long transactionId, String fromAccountNumber,  BigDecimal amount,
 			String currencyCode, TransactionType transactionType, TransactionStatus status, String referenceNumber,
 			LocalDateTime transactionDate, String description) {
 		super();
 		this.transactionId = transactionId;
 		this.fromAccountNumber = fromAccountNumber;
-		this.toAccountNumber = toAccountNumber;
+//		this.toAccountNumber = toAccountNumber;
 		this.amount = amount;
 		this.currencyCode = currencyCode;
 		this.transactionType = transactionType;
@@ -83,13 +85,13 @@ public class Transaction {
 		this.fromAccountNumber = fromAccountNumber;
 	}
 
-	public String getToAccountNumber() {
-		return toAccountNumber;
-	}
-
-	public void setToAccountNumber(String toAccountNumber) {
-		this.toAccountNumber = toAccountNumber;
-	}
+//	public String getToAccountNumber() {
+//		return toAccountNumber;
+//	}
+//
+//	public void setToAccountNumber(String toAccountNumber) {
+//		this.toAccountNumber = toAccountNumber;
+//	}
 
 	public BigDecimal getAmount() {
 		return amount;
@@ -151,7 +153,7 @@ public class Transaction {
 	@Override
 	public String toString() {
 		return "Transaction [transactionId=" + transactionId + ", fromAccountNumber=" + fromAccountNumber
-				+ ", toAccountNumber=" + toAccountNumber + ", amount=" + amount + ", currencyCode=" + currencyCode
+				+ ", amount=" + amount + ", currencyCode=" + currencyCode
 				+ ", transactionType=" + transactionType + ", status=" + status + ", referenceNumber=" + referenceNumber
 				+ ", transactionDate=" + transactionDate + ", description=" + description + "]";
 	}

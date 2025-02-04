@@ -3,12 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { BeneficiaryService } from '../../services/beneficiary.service';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { CommonModule, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-add-beneficiary',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule,RouterLink],
   templateUrl: './add-beneficiary.component.html',
   styleUrl: './add-beneficiary.component.css'
 })
@@ -20,7 +20,7 @@ export class AddBeneficiaryComponent implements OnInit {
   beneficiaries: any[] = [];
  beneficiary = this.resetBeneficiary();
 
-  constructor(private beneficiaryService: BeneficiaryService, private fb: FormBuilder) {
+  constructor(private beneficiaryService: BeneficiaryService, private fb: FormBuilder, private router: Router) {
     // Initialize the form
     this.beneficiaryForm = this.fb.group({
       beneficiaryName: ['', Validators.required],
@@ -76,11 +76,13 @@ export class AddBeneficiaryComponent implements OnInit {
       } else {
         // Add new beneficiary
         this.beneficiary = this.beneficiaryForm.value;
+        this.beneficiary.customerId = localStorage.getItem('customerId')!;
         console.log('Beneficiary customerId id:', this.beneficiary.customerId);
         this.beneficiaryService.addBeneficiary(this.beneficiary).subscribe(
           () => {
             this.loadBeneficiaries();
             this.beneficiary = this.resetBeneficiary();
+            this.router.navigate(['/app-beneficiary']);
           },
           (error) => console.error('Error adding beneficiary', error)
         );

@@ -4,8 +4,9 @@ import java.math.BigDecimal;
 
 public class TransferRequestDTO {
     private String selectedAccount;
-    private String beneficiaryAccountNumber;
     private BigDecimal transferAmount;
+    private Long beneficiaryId;
+    private String beneficiaryAccountNumber;
 
     public String getSelectedAccount() {
         return selectedAccount;
@@ -15,14 +16,6 @@ public class TransferRequestDTO {
         this.selectedAccount = selectedAccount;
     }
 
-    public String getBeneficiaryAccountNumber() {
-		return beneficiaryAccountNumber;
-	}
-
-	public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
-		this.beneficiaryAccountNumber = beneficiaryAccountNumber;
-	}
-
 	public BigDecimal getTransferAmount() {
         return transferAmount;
     }
@@ -30,4 +23,29 @@ public class TransferRequestDTO {
     public void setTransferAmount(BigDecimal transferAmount) {
         this.transferAmount = transferAmount;
     }
+
+	public Long getBeneficiaryId() {
+		return beneficiaryId;
+	}
+
+	public void setBeneficiaryId(Long beneficiaryId) {
+		this.beneficiaryId = beneficiaryId;
+	}
+
+	
+	public String getBeneficiaryAccountNumber() {
+		return beneficiaryAccountNumber;
+	}
+
+	public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
+		this.beneficiaryAccountNumber = beneficiaryAccountNumber;
+	}
+
+	@Override
+	public String toString() {
+		return "TransferRequestDTO [selectedAccount=" + selectedAccount + ", transferAmount=" + transferAmount
+				+ ", beneficiaryId=" + beneficiaryId + ", beneficiaryAccountNumber=" + beneficiaryAccountNumber + "]";
+	}
+
+	
 }

@@ -27,7 +27,7 @@ export class BeneficiaryService {
     });
 
     const customerId = localStorage.getItem('customerId');
-    return this.http.get<any[]>(`${this.baseUrl}${customerId}`, { headers });
+    return this.http.get<any[]>(`${this.baseUrl}customers/${customerId}`, { headers });
   }
 
   // Add a new beneficiary

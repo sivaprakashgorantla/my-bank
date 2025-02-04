@@ -9,5 +9,5 @@ import com.sivaprakash.fund.entity.Transaction;
 public interface TransactionService {
 	List<TransactionDTO> getLastTenTransactions(String accountId) ;
 	List<TransactionDTO> searchTransactions(TransactionSearchCriteria criteria);
-	boolean processTransfer(Transaction fromTransaction, Transaction toTransaction);
+	boolean processTransfer(Transaction fromTransaction, Transaction toTransaction,String beneficiaryBankCode,String beneficiaryName);
 }

@@ -3,12 +3,24 @@ package com.example.demo;
 public class Employee {
 	private int eno;
 	private String name;
+	private String gender;
 
 	public Employee(int eno, String name) {
 		super();
 		this.eno = eno;
 		this.name = name;
 	}
+	
+	
+
+	public Employee(int eno, String name, String gender) {
+		super();
+		this.eno = eno;
+		this.name = name;
+		this.gender = gender;
+	}
+
+
 
 	public int getEno() {
 		return eno;
@@ -30,4 +42,17 @@ public class Employee {
 	public String toString() {
 		return "Employee [eno=" + eno + ", name=" + name + "]";
 	}
+
+
+
+	public String getGender() {
+		return gender;
+	}
+
+
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
 }

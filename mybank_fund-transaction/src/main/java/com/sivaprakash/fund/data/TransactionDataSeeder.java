@@ -100,7 +100,7 @@ public class TransactionDataSeeder {
 		} while (toAccountNumber.equals(fromAccountNumber)); // Ensure different accounts
 
 		transaction.setFromAccountNumber(fromAccountNumber);
-		transaction.setToAccountNumber(toAccountNumber);
+		//transaction.setToAccountNumber(toAccountNumber);
 
 		// Set random amount between 10 and 1000
 		BigDecimal amount = BigDecimal.valueOf(10 + random.nextDouble() * 990).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -142,9 +142,9 @@ public class TransactionDataSeeder {
 	private String generateDescription(Transaction transaction) {
 	    return String.format("Transfer of %s %s from %s to %s", 
 	        transaction.getCurrencyCode(), 
-	        transaction.getAmount(), 
-	        transaction.getFromAccountNumber(), 
-	        transaction.getToAccountNumber());
+	        transaction.getAmount());
+	       // transaction.getFromAccountNumber(), 
+	      //  transaction.getToAccountNumber());
 	}
 
 //

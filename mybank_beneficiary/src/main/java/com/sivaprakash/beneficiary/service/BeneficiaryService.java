@@ -12,5 +12,7 @@ public interface BeneficiaryService {
 
 	public List<BeneficiaryResponseDTO> getBeneficiariesByConstomerId(Long customerId);
 
+	BeneficiaryResponseDTO getBeneficiaryById(Long beneficiaryId);
+	
 	public void deleteBeneficiaryById(Long beneficiaryId);
 }
