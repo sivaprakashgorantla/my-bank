@@ -87,7 +87,9 @@ public class TransactionController {
 
 		BeneficiaryResponseDTO beneficiary = beneficiaryClient
 				.getBeneficiaryByCustomerId(transferRequest.getBeneficiaryId());
-		
+		if (beneficiary == null) {
+			return ResponseEntity.badRequest().body(new TransferResponseDTO(false, "Beneficiary not found!"));
+		}
 		//passing beneficiary account no.  so setting beneficiary account number 
 		beneficiary.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
 		transferRequest.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
@@ -107,9 +109,7 @@ public class TransactionController {
 		// Update balance using Feign Client
 		ResponseEntity<UpdateBalanceResponseDTO> response = accountClient.updateBalance(transferRequest);
 
-		if (beneficiary != null) {
-			return ResponseEntity.badRequest().body(new TransferResponseDTO(false, "Beneficiary not found!"));
-		}
+		
 		System.out.println("updare balance response : " + response);
 		TransferResponseDTO transferResponse = new TransferResponseDTO();
 		transferResponse.setSuccess(true);

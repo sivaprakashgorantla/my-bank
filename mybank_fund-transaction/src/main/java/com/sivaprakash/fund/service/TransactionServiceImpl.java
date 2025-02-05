@@ -18,14 +18,11 @@ public class TransactionServiceImpl implements TransactionService {
 	@Autowired
 	private TransactionRepository transactionRepository;
 
-	@Override
 	@Transactional(readOnly = true)
 	public List<TransactionDTO> getLastTenTransactions(String accountNumber) {
-		List<Transaction> transactions = null;
-//				transactionRepository
-//				.findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(accountNumber, accountNumber);
-//		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
-		return null;
+		System.out.println("getLastTenTransactions : "+accountNumber);
+	    List<Transaction> transactions = transactionRepository.findLast10Transactions(accountNumber);
+	    return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override

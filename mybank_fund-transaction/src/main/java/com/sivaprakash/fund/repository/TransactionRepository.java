@@ -13,19 +13,17 @@ import com.sivaprakash.fund.entity.Transaction;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-//    // Native Query: Use database column names
-//    @Query(value = """
-//            SELECT *
-//            FROM (
-//                SELECT t.*,
-//                       ROWNUM as rn
-//                FROM transactions t
-//                WHERE t.from_account_number = :fromAccountNumber OR t.to_account_number = :toAccountNumber
-//                ORDER BY t.transaction_date DESC
-//            )
-//            WHERE rn <= 10
-//            """, nativeQuery = true)
-//    List<Transaction> findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(
+	@Query(value = """
+		    SELECT * FROM (
+		        SELECT t.* FROM transactions t 
+		        WHERE t.account_number = :accountNumber 
+		        ORDER BY t.transaction_date DESC
+		    ) WHERE ROWNUM <= 10
+		    """, nativeQuery = true)
+		List<Transaction> findLast10Transactions(@Param("accountNumber") String accountNumber);
+	
+	
+	//    List<Transaction> findTop10ByFromAccountIdOrToAccountIdOrderByTransactionDateDesc(
 //            @Param("fromAccountNumber") String fromAccountNumber,
 //            @Param("toAccountNumber") String toAccountNumber);
 //
