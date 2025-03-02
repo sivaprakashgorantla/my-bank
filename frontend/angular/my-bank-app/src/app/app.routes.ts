@@ -16,6 +16,9 @@ import { UpdateBeneficiaryComponent } from './beneficiary/update-beneficiary/upd
 import { UserOtpValidationComponent } from './user-otp-validation/user-otp-validation.component';
 import { ValidateCustomerComponent } from './validate-customer/validate-customer.component';
 import { PersonComponent } from './person/person/person.component';
+import { LoanApplicationComponent } from './loans/loan-application/loan-application.component';
+import { LoanApprovalsComponent } from './loans/loan-approvals/loan-approvals.component';
+import { LoanDetailsComponent } from './loans/loan-details/loan-details.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +35,10 @@ export const routes: Routes = [
       { path: 'app-add-beneficiary', component: AddBeneficiaryComponent },
       { path: 'app-update-beneficiary/:beneficiaryId', component: UpdateBeneficiaryComponent },
       { path: 'app-validate-customer',component:ValidateCustomerComponent },
+      { path:'app-loan-application',component:LoanApplicationComponent},
+      { path:'app-loan-approvals',component:LoanApprovalsComponent},
+      { path:'app-loan-details/:referenceNumber',component:LoanDetailsComponent},
+      
     ]
   },
   { path: 'login', component: LoginComponent },

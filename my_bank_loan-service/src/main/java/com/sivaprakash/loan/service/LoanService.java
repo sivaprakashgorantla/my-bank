@@ -1,26 +1,36 @@
 package com.sivaprakash.loan.service;
 
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.sivaprakash.loan.LoanApplicationRequest;
-import com.sivaprakash.loan.LoanUpdateRequest;
-import com.sivaprakash.loan.ProcessingFeePaymentRequest;
 import com.sivaprakash.loan.entity.LoanApplication;
+import com.sivaprakash.loan.entity.LoanType;
 import com.sivaprakash.loan.enums.LoanStatus;
-import com.sivaprakash.loan.kafka.EventPublisher;
+import com.sivaprakash.loan.feignclient.AccountFeignClient;
+import com.sivaprakash.loan.feignclient.TransactionClient;
+import com.sivaprakash.loan.feignclient.UserClient;
 import com.sivaprakash.loan.repository.LoanRepository;
+import com.sivaprakash.loan.request.LoanApplicationRequest;
+import com.sivaprakash.loan.request.LoanUpdateRequest;
+import com.sivaprakash.loan.request.TransferRequestDTO;
+import com.sivaprakash.loan.response.AccountDetailsDTO;
+import com.sivaprakash.loan.response.AccountResponseDTO;
+import com.sivaprakash.loan.response.CustomerResponse;
 import com.sivaprakash.loan.response.LoanApplicationResponse;
-import com.sivaprakash.loan.response.PaymentResponse;
+import com.sivaprakash.loan.response.TransactionResponseDTO;
+import com.sivaprakash.loan.response.UpdateBalanceResponseDTO;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
@@ -29,154 +39,347 @@ import jakarta.validation.ValidationException;
 @Transactional
 public class LoanService {
 
-    @Autowired
-    private LoanRepository loanRepository;
+	private static final Logger logger = LoggerFactory.getLogger(LoanService.class);
 
-    @Autowired
-    private PaymentService paymentService;
+	@Autowired
+	private LoanRepository loanRepository;
 
-    @Autowired
-    private EventPublisher eventPublisher;
+	@Autowired
+	private UserClient userClient;
 
-    public LoanApplicationResponse createLoanApplication(LoanApplicationRequest request) {
-       
-        validateLoanRequest(request);
+	@Autowired
+	private AccountFeignClient accountFeignClient;
 
-        LoanApplication loan = buildLoanApplication(request);
-        loan = loanRepository.save(loan);
+	@Autowired
+	private TransactionClient transactionClient;
 
-        String referenceNumber = generateReferenceNumber(loan.getLoanId());
-        loan.setReferenceNumber(referenceNumber);
-        loanRepository.save(loan);
+	public LoanApplicationResponse createLoanApplication(LoanApplicationRequest request) {
+		logger.info("Creating loan application for customer ID: {}", request.getCustomerId());
 
-        eventPublisher.publishLoanCreatedEvent(loan);
+		validateLoanRequest(request);
 
-        return buildLoanApplicationResponse(loan);
-    }
+		LoanApplication loan = buildLoanApplication(request);
+		loan = loanRepository.save(loan);
+		BigDecimal bigDecimalValue = BigDecimal.valueOf(loan.getLoanType().getInterestRate());
+		loan.setInterestRate(bigDecimalValue);
+		String referenceNumber = generateReferenceNumber(loan.getLoanId());
+		loan.setReferenceNumber(referenceNumber);
+		loanRepository.save(loan);
 
-    public LoanApplication getLoanApplication(Long loanId) {
-        return loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
-    }
+		logger.info("Loan application created successfully with Reference Number: {}", referenceNumber);
 
-    public LoanApplication updateLoanApplication(Long loanId, LoanUpdateRequest request) {
-        LoanApplication loan = getLoanApplication(loanId);
-        if (!loan.getStatus().equals(LoanStatus.PENDING)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be updated");
-        }
+		return buildLoanApplicationResponse(loan);
+	}
 
-        loan.setAmount(request.getAmount());
-        loan.setPurpose(request.getPurpose());
-        loan.setTermMonths(request.getTermMonths());
-        return loanRepository.save(loan);
-    }
+	public LoanApplication getLoanApplication(Long loanId) {
+		logger.info("Fetching loan application with ID: {}", loanId);
+		return loanRepository.findById(loanId).orElseThrow(() -> {
+			logger.error("Loan not found with ID: {}", loanId);
+			return new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found");
+		});
+	}
 
-    public void cancelLoanApplication(Long loanId) {
-        LoanApplication loan = getLoanApplication(loanId);
-        if (!loan.getStatus().equals(LoanStatus.PENDING)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be canceled");
-        }
+	public LoanApplication updateLoanApplication(Long loanId, LoanUpdateRequest request) {
+		logger.info("Updating loan application with ID: {}", loanId);
+		LoanApplication loan = getLoanApplication(loanId);
 
-        loan.setStatus(LoanStatus.CANCELLED);
-        loanRepository.save(loan);
-    }
+		if (!loan.getStatus().equals(LoanStatus.PENDING)) {
+			logger.warn("Attempted update on non-pending loan ID: {}", loanId);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be updated");
+		}
 
-    public PaymentResponse processProcessingFeePayment(Long loanId, ProcessingFeePaymentRequest request) {
-        LoanApplication loan = getLoanApplication(loanId);
-        if (loan.getProcessingFeePaid()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Processing fee is already paid");
-        }
+		loan.setLoanAmount(request.getAmount());
+		loan.setLoanPurpose(request.getLoanPurpose());
+		loan.setTermMonths(request.getTermMonths());
+		logger.info("Loan application updated successfully for loan ID: {}", loanId);
+		return loanRepository.save(loan);
+	}
 
-        PaymentResponse paymentResponse = paymentService.payProcessingFee(loan, request);
-        loan.setProcessingFeePaid(true);
-        loan.setStatus(LoanStatus.PENDING);
-        loanRepository.save(loan);
+	public void cancelLoanApplication(Long loanId) {
+		logger.info("Cancelling loan application with ID: {}", loanId);
+		LoanApplication loan = getLoanApplication(loanId);
 
-        eventPublisher.publishProcessingFeePaidEvent(loan);
-        return paymentResponse;
-    }
+		if (!loan.getStatus().equals(LoanStatus.PENDING)) {
+			logger.warn("Attempted cancellation of non-pending loan ID: {}", loanId);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be canceled");
+		}
 
-    public List<LoanApplication> getActiveLoansForUser(Long userId) {
-        return null;//loanRepository.findByUserIdAndStatusNot(userId, LoanStatus.CANCELLED);
-    }
+		loan.setStatus(LoanStatus.CANCELLED);
+		loanRepository.save(loan);
+		logger.info("Loan application cancelled successfully for loan ID: {}", loanId);
+	}
 
-    public LoanApplicationResponse getLoanStatus(String referenceNumber) {
-        // Find the loan by reference number, throw an error if not found
-        LoanApplication loan = loanRepository.findByReferenceNumber(referenceNumber)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found"));
+//    public PaymentResponse processProcessingFeePayment(Long loanId, ProcessingFeePaymentRequest request) {
+//        logger.info("Processing fee payment for loan ID: {}", loanId);
+//        LoanApplication loan = getLoanApplication(loanId);
+//
+//        if (loan.getProcessingFeePaid()) {
+//            logger.warn("Processing fee already paid for loan ID: {}", loanId);
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Processing fee is already paid");
+//        }
+//
+//        PaymentResponse paymentResponse = paymentService.payProcessingFee(loan, request);
+//        loan.setProcessingFeePaid(true);
+//        loan.setStatus(LoanStatus.PENDING);
+//        loanRepository.save(loan);
+//
+//        eventPublisher.publishProcessingFeePaidEvent(loan);
+//        logger.info("Processing fee payment completed successfully for loan ID: {}", loanId);
+//        return paymentResponse;
+//    }
 
-        // Return a response based on the found loan
-        return buildLoanApplicationResponse(loan);
-    }
+	public List<LoanApplication> getActiveLoansForUser(Long customerId) {
+		logger.info("Fetching active loans for customer ID: {}", customerId);
+		return loanRepository.findByCustomerIdAndStatusNot(customerId, LoanStatus.CANCELLED);
+	}
 
-    private LoanApplication buildLoanApplication(LoanApplicationRequest request) {
-        LoanApplication loan = new LoanApplication();
-        loan.setUserId(request.getUserId());
-        loan.setAmount(request.getAmount());
-        loan.setPurpose(request.getPurpose());
-        loan.setTermMonths(request.getTermMonths());
-        loan.setStatus(LoanStatus.PENDING);
-        loan.setApplicationDate(LocalDateTime.now());
-        loan.setProcessingFee(calculateProcessingFee(request.getAmount()));
-        loan.setProcessingFeePaid(false);
-        return loan;
-    }
+//    public LoanApplicationResponse getLoanStatus(String referenceNumber) {
+//        logger.info("Fetching loan status for reference number: {}", referenceNumber);
+//        LoanApplication loan = loanRepository.findByReferenceNumber(referenceNumber)
+//                .orElseThrow(() -> {
+//                    logger.error("Loan not found with reference number: {}", referenceNumber);
+//                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found");
+//                });
+//
+//        logger.info("Loan status retrieved successfully for reference number: {}", referenceNumber);
+//        return buildLoanApplicationResponse(loan);
+//    }
 
-    private BigDecimal calculateProcessingFee(BigDecimal amount) {
-        return amount.multiply(new BigDecimal("0.02")).setScale(2, RoundingMode.HALF_UP);
-    }
+	public LoanApplicationResponse getLoanStatus(String referenceNumber) {
+		logger.info("Fetching loan status for reference number: {}", referenceNumber);
 
-    private String generateReferenceNumber(Long loanId) {
-        return "REF-" + loanId + "-" + System.currentTimeMillis();
-    }
+		LoanApplication loan = loanRepository.findByReferenceNumber(referenceNumber).orElseThrow(() -> {
+			logger.error("Loan not found with reference number: {}", referenceNumber);
+			return new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan not found");
+		});
 
-    private LoanApplicationResponse buildLoanApplicationResponse(LoanApplication loan) {
-        return LoanApplicationResponse.builder()
-                .loanId(loan.getLoanId())
-                .referenceNumber(loan.getReferenceNumber())
-                .status(loan.getStatus())
-                .amount(loan.getAmount())
-                .processingFee(loan.getProcessingFee())
-                .applicationDate(loan.getApplicationDate())
-                .message("Loan details retrieved successfully")
-                .build();
-    }
+		// Fetch Customer Details using Feign Client
+		CustomerResponse customer = userClient.getCustomerById(loan.getCustomerId());
 
-    private void validateLoanRequest(LoanApplicationRequest request) {
-        List<String> errors = new ArrayList<>(); // Collects all validation errors
+		logger.info("CustomerResponse: {}", customer);
 
-        // Basic validation for user ID
-        if (request.getUserId() == null) {
-            errors.add("User ID is required");
-        }
+		logger.info("Loan status retrieved successfully for reference number: {}", referenceNumber);
 
-        // Loan amount must be greater than zero
-        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            errors.add("Loan amount must be greater than zero");
-        }
+		return new LoanApplicationResponse.Builder().loanId(loan.getLoanId()).customerId(loan.getCustomerId())
+				.customerName(customer.getFirstName() + " " + customer.getLastName()) // Set fetched customer name
+				.referenceNumber(loan.getReferenceNumber()).status(loan.getStatus()).loanAmount(loan.getLoanAmount())
+				.loanType(loan.getLoanType()).termMonths(loan.getTermMonths()).processingFee(loan.getProcessingFee())
+				.applicationDate(loan.getApplicationDate()).build();
+	}
 
-        // Loan purpose must not be empty
-        if (request.getPurpose() == null || request.getPurpose().trim().isEmpty()) {
-            errors.add("Loan purpose is required");
-        }
+	private LoanApplication buildLoanApplication(LoanApplicationRequest request) {
+		logger.debug("Building loan application for customer ID: {}", request.getCustomerId());
+		LoanApplication loan = new LoanApplication();
+		loan.setCustomerId(request.getCustomerId());
+		loan.setLoanAmount(request.getLoanAmount());
+		loan.setLoanPurpose(request.getLoanPurpose());
+		loan.setTermMonths(request.getTermMonths());
+		loan.setStatus(LoanStatus.PENDING);
+		loan.setApplicationDate(LocalDateTime.now());
+		loan.setProcessingFee(calculateProcessingFee(request.getLoanAmount()));
+		loan.setProcessingFeePaid(false);
+		return loan;
+	}
 
-        // Loan term must be between 3 and 60 months
-        if (request.getTermMonths() == null || request.getTermMonths() < 3 || request.getTermMonths() > 60) {
-            errors.add("Loan term must be between 3 and 60 months");
-        }
+	private BigDecimal calculateProcessingFee(BigDecimal amount) {
+		logger.debug("Calculating processing fee for amount: {}", amount);
+		return amount.multiply(new BigDecimal("0.02")).setScale(2, RoundingMode.HALF_UP);
+	}
 
-        // Customer details validation
-        if (request.getCustomerDetails() != null) {
-            // Monthly income must be greater than zero (if provided)
-            if (request.getCustomerDetails().getMonthlyIncome() != null && 
-                request.getCustomerDetails().getMonthlyIncome().compareTo(BigDecimal.ZERO) <= 0) {
-                errors.add("Monthly income must be greater than zero");
-            }
-        }
+	private String generateReferenceNumber(Long loanId) {
+		String reference = "REF-" + loanId + "-" + System.currentTimeMillis();
+		logger.debug("Generated reference number: {}", reference);
+		return reference;
+	}
 
-        // Throw an exception if any validation errors exist
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation failed: " + String.join(", ", errors));
-        }
-    }
+	private LoanApplicationResponse buildLoanApplicationResponse(LoanApplication loan) {
+		logger.debug("Building loan response for loan ID: {}", loan.getLoanId());
+		return new LoanApplicationResponse.Builder().loanId(loan.getLoanId()).referenceNumber(loan.getReferenceNumber())
+				.status(loan.getStatus()).loanAmount(loan.getLoanAmount()).processingFee(loan.getProcessingFee())
+				.applicationDate(loan.getApplicationDate()).build();
+	}
+
+	private void validateLoanRequest(LoanApplicationRequest request) {
+		List<String> errors = new ArrayList<>();
+		logger.debug("Validating loan request for customer ID: {}", request.getCustomerId());
+
+		if (request.getCustomerId() == null) {
+			errors.add("Customer ID is required");
+		}
+		if (request.getLoanAmount() == null || request.getLoanAmount().compareTo(BigDecimal.ZERO) <= 0) {
+			errors.add("Loan amount must be greater than zero");
+		}
+		if (request.getLoanPurpose() == null || request.getLoanPurpose().trim().isEmpty()) {
+			errors.add("Loan purpose is required");
+		}
+		if (request.getTermMonths() == null || request.getTermMonths() < 3 || request.getTermMonths() > 60) {
+			errors.add("Loan term must be between 3 and 60 months");
+		}
+		if (!errors.isEmpty()) {
+			logger.error("Validation failed: {}", String.join(", ", errors));
+			throw new ValidationException("Validation failed: " + String.join(", ", errors));
+		}
+		logger.debug("Loan request validated successfully");
+	}
+
+	public List<LoanApplication> allApprovals() {
+		logger.info("Fetching all loan approvals");
+		return loanRepository.findAll();
+	}
+
+	public List<String> getLoanTypes() {
+		// TODO Auto-generated method stub
+		logger.info("getLoanTypes all loan approvals");
+		return Arrays.stream(LoanType.values()).map(Enum::name).toList();
+	}
+
+	public Double getInterestRateByLoanType(String loanType) {
+		// TODO Auto-generated method stub
+		LoanType type = LoanType.valueOf(loanType.toUpperCase());
+		return type.getInterestRate();
+	}
+
+/*	public LoanApplication approveLoan(LoanUpdateRequest request) {
+	    logger.info("approveLoan Approving loan with ID: {}", request.getLoanId());
+	    logger.info("approveLoan Approving loan with remark: {}", request.getRemarkInput());
+	    LoanApplication loan = getLoanApplication(request.getLoanId());
+
+	    if (!loan.getStatus().equals(LoanStatus.PENDING)) {
+	        logger.warn("Attempted approval on non-pending loan ID: {}", request.getLoanId());
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be approved");
+	    }
+
+	    loan.setStatus(LoanStatus.APPROVED);
+	    loan.setRemarkInput(request.getRemarkInput()); // Save the remark
+	    loan.setApprovalDate(LocalDateTime.now());
+	    loanRepository.save(loan);
+	    logger.info("Loan approved successfully for loan ID: {}", request.getLoanId());
+
+	    // Call Feign Client to update account balance
+        try {
+        	
+        	ResponseEntity<AccountResponseDTO> response = accountFeignClient.getAccountsByCustomerId(loan.getCustomerId());
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                logger.info("Account details fetched successfully for customer ID: {}", loan.getCustomerId());
+
+                BigDecimal amount = response.getBody().getAccounts().get(0).getBalance();
+                String accountNumber = response.getBody().getAccounts().get(0).getAccountNumber();
+                BigDecimal balenceLoanAmount = loan.getLoanAmount().subtract(loan.getProcessingFee());
+                System.out.println("Inicial balance :"+amount);
+                System.out.println("Loan amount  balance :"+loan.getLoanAmount());
+                System.out.println("Loan Processing amount amount  balance :"+loan.getProcessingFee());
+                
+                BigDecimal totalAmount = amount.add(balenceLoanAmount) ;
+//                TransferRequestDTO transferRequestDTO = new TransferRequestDTO();
+//                transferRequestDTO.setCustomerId(loan.getCustomerId());
+//                transferRequestDTO.setSelectedAccount(accountNumber);
+//                transferRequestDTO.setTransferAmount(amount.add(totalAmount));
+//                ResponseEntity<UpdateBalanceResponseDTO> accountDetails = accountFeignClient.updateAccountBalance(transferRequestDTO);
+//                logger.info("No account details found for customer ID: {}", accountDetails);
+//            
+                TransferRequestDTO transactionDTO = new TransferRequestDTO();
+	            //transactionDTO.setFromAccountNumber("LOAN_DISBURSEMENT");
+	            transactionDTO.setSelectedAccount(accountNumber);
+	            transactionDTO.setTransferAmount(balenceLoanAmount);
+
+	            // Call Transaction Microservice using Feign Client
+	            ResponseEntity<TransactionResponseDTO> transactionResponse = transactionClient.createTransaction(transactionDTO);
+
+	            if (transactionResponse.getStatusCode().is2xxSuccessful()) {
+	                logger.info("Transaction recorded successfully: {}", transactionResponse.getBody());
+	            } else {
+	                logger.error("Failed to record transaction for loan disbursement.");
+	                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to record transaction.");
+	            }
+	        } else {
+	            logger.warn("No account details found for customer ID: {}", loan.getCustomerId());
+	        }
+
+             
+            
+                logger.info("Account balance updated successfully."+response.getBody());
+        }catch(
+
+	Exception e)
+	{
+		logger.error("Error updating account balance: {}", e.getMessage(), e);
+		throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update account balance.");
+	}
+*/
+	
+	public LoanApplication approveLoan(LoanUpdateRequest request) {
+	    logger.info("Approving loan with ID: {}", request.getLoanId());
+	    LoanApplication loan = getLoanApplication(request.getLoanId());
+
+	    if (!loan.getStatus().equals(LoanStatus.PENDING)) {
+	        logger.warn("Attempted approval on non-pending loan ID: {}", request.getLoanId());
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be approved");
+	    }
+
+	    loan.setStatus(LoanStatus.APPROVED);
+	    loan.setRemarkInput(request.getRemarkInput());
+	    loan.setApprovalDate(LocalDateTime.now());
+	    loanRepository.save(loan);
+	    logger.info("Loan approved successfully for loan ID: {}", request.getLoanId());
+
+	    try {
+	        // Fetch company (lender's) account details
+	        ResponseEntity<AccountResponseDTO> companyAccountResponse = accountFeignClient.getCompanyAccount();
+	        if (!companyAccountResponse.getStatusCode().is2xxSuccessful() || companyAccountResponse.getBody() == null) {
+	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch company account details");
+	        }
+
+	        //AccountDetailsDTO companyAccount = companyAccountResponse.getBody().getAccounts().get(0);
+	        String companyAccountNumber = companyAccountResponse.getBody().getAccounts().get(0).getAccountNumber();
+	        BigDecimal companyBalance = companyAccountResponse.getBody().getAccounts().get(0).getBalance();
+
+	        BigDecimal disbursementAmount = loan.getLoanAmount().subtract(loan.getProcessingFee());
+
+	        // Check if company balance is sufficient
+	        if (companyBalance.compareTo(disbursementAmount) < 0) {
+	            BigDecimal reloadAmount = disbursementAmount.subtract(companyBalance).add(new BigDecimal("10000000")); // Extra buffer
+	            logger.info("Insufficient funds in company account. Reloading with amount: {}", reloadAmount);
+
+	            TransferRequestDTO reloadRequest = new TransferRequestDTO();
+	            reloadRequest.setSelectedAccount(companyAccountNumber);
+	            reloadRequest.setTransferAmount(reloadAmount);
+
+	            ResponseEntity<UpdateBalanceResponseDTO> reloadResponse = accountFeignClient.updateAccountBalance(reloadRequest);
+
+	            if (!reloadResponse.getStatusCode().is2xxSuccessful()) {
+	                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to reload company account");
+	            }
+
+	            logger.info("Company account reloaded successfully with amount: {}", reloadAmount);
+	        }
+
+	        // Debit company account and credit customer account
+	        ResponseEntity<AccountResponseDTO> customerAccountResponse = accountFeignClient.getAccountsByCustomerId(loan.getCustomerId());
+	        if (!customerAccountResponse.getStatusCode().is2xxSuccessful() || customerAccountResponse.getBody() == null) {
+	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch customer account details");
+	        }
+
+	        String customerAccountNumber = customerAccountResponse.getBody().getAccounts().get(0).getAccountNumber();
+
+	        TransferRequestDTO transactionDTO = new TransferRequestDTO();
+	        transactionDTO.setSelectedAccount(companyAccountNumber );
+	        transactionDTO.setCustomerId(loan.getCustomerId());
+	        transactionDTO.setBeneficiaryAccountNumber(customerAccountNumber);
+	        transactionDTO.setTransferAmount(disbursementAmount);
+	        transactionDTO.setTranserType("COMPANY-TRANSFER");
+	        ResponseEntity<TransactionResponseDTO> transactionResponse = transactionClient.createTransaction(transactionDTO);
+	        if (!transactionResponse.getStatusCode().is2xxSuccessful()) {
+	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to record loan disbursement transaction");
+	        }
+
+	        logger.info("Loan amount disbursed successfully to customer account: {}", customerAccountNumber);
+	    } catch (Exception e) {
+	        logger.error("Error in loan approval process: {}", e.getMessage(), e);
+	        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Loan approval process failed");
+	    }
+
+	    return loan;
+	}
+
 }

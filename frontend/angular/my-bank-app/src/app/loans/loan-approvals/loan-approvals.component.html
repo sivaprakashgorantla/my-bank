@@ -1,0 +1,39 @@
+<!-- loan-approvals.component.html -->
+<div class="loan-approvals-container p-6 bg-gray-100 min-h-screen">
+  <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">Loan Approvals</h2>
+
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse bg-white shadow-lg rounded-lg">
+      <thead>
+        <tr class="bg-blue-600 text-white text-left">
+          <th class="p-3">Loan ID</th>
+          <th class="p-3">Customer ID</th>
+          <th class="p-3">Loan Amount</th>
+          <th class="p-3">Status</th>
+          <th class="p-3 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let loan of loanApplications" class="border-b hover:bg-gray-100">
+          <td class="p-3">{{ loan.loanId }}</td>
+          <td class="p-3">{{ loan.customerId }}</td>
+          <td class="p-3 font-semibold text-green-600">{{ loan.loanAmount | currency }}</td>
+          <td class="p-3">
+            <span 
+              class="px-2 py-1 rounded text-white text-sm"
+              [ngClass]="{
+                'bg-green-500': loan.status === 'APPROVED',
+                'bg-yellow-500': loan.status === 'PENDING',
+                'bg-red-500': loan.status === 'REJECTED'
+              }">
+              {{ loan.status }}
+            </span>
+          </td>
+          <td>
+            <button (click)="viewDetails(loan.referenceNumber)">View Details</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

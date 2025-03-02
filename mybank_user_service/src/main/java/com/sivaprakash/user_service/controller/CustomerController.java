@@ -68,6 +68,22 @@ public class CustomerController {
         }
     }
 
+    
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<?> getCustomerDetails(@PathVariable Long customerId) {
+        logger.info("Fetching customer details for customerId={}", customerId);
+        try {
+            CustomerProfileDTO customerProfile = customerService.getCustomerDetailsById(customerId);
+            return ResponseEntity.ok(customerProfile);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid customerId: {}", customerId);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error fetching customer details: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving customer details");
+        }
+    }
+
     @GetMapping("/customer-id/{userId}")
     public ResponseEntity<?> getCustomerIdByUserId(@PathVariable Long userId) {
         logger.info("Fetching customer ID for userId={}", userId);

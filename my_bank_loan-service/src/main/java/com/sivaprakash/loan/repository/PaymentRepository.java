@@ -16,7 +16,7 @@ import com.sivaprakash.loan.enums.PaymentStatus;
 // PaymentRepository.java
 @Repository
 public interface PaymentRepository extends JpaRepository<LoanPayment, Long> {
-    List<LoanPayment> findByLoanIdOrderByPaymentDateDesc(Long loanId);
+    //List<LoanPayment> findByLoanIdOrderByPaymentDateDesc(Long loanId);
     
     @Query("SELECT p FROM LoanPayment p WHERE p.loanId = :loanId AND p.status = :status")
     List<LoanPayment> findByLoanIdAndStatus(Long loanId, PaymentStatus status);

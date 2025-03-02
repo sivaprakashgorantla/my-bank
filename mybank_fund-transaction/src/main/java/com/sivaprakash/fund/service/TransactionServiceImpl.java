@@ -71,18 +71,14 @@ public class TransactionServiceImpl implements TransactionService {
 	@Transactional
     public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction,String beneficiaryBankCode,String beneficiaryName) {
         try {
-            // Save the debit transaction (fromTransaction)
-            fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
-            transactionRepository.save(fromTransaction);
-
+        	if(fromTransaction!= null && beneficiaryBankCode!=null && beneficiaryName!= null) { // checking loan transaction
+        		// Save the debit transaction (fromTransaction)
+        		fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+        		transactionRepository.save(fromTransaction);
+        	}
             // Save the credit transaction (toTransaction)
             toTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
             transactionRepository.save(toTransaction);
-
-            // TODO: Update account balances in AccountService
-            // Example:
-            // accountService.debitAmount(fromTransaction.getFromAccountNumber(), fromTransaction.getAmount());
-            // accountService.creditAmount(toTransaction.getToAccountNumber(), toTransaction.getAmount());
 
             return true;
         } catch (Exception e) {

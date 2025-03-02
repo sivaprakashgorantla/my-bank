@@ -35,8 +35,6 @@ public class TransactionController {
 	@Autowired
 	private TransactionService transactionService;
 
-	@Autowired
-	private RestTemplate restTemplate;
 
 	@Autowired
 	private AccountClient accountClient;
@@ -82,16 +80,64 @@ public class TransactionController {
 		return ResponseEntity.ok(response);
 	}
 
+//	@PostMapping("/transfer")
+//	public ResponseEntity<TransferResponseDTO> transfer(@RequestBody TransferRequestDTO transferRequest) {
+//
+//		BeneficiaryResponseDTO beneficiary = beneficiaryClient
+//				.getBeneficiaryByCustomerId(transferRequest.getBeneficiaryId());
+//		if (beneficiary == null) {
+//			return ResponseEntity.badRequest().body(new TransferResponseDTO(false, "Beneficiary not found!"));
+//		}
+//		//passing beneficiary account no.  so setting beneficiary account number 
+//		beneficiary.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
+//		transferRequest.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
+//
+//
+//		Transaction toTransaction = getToTransaction(transferRequest, beneficiary); // String url =
+//																					// "http://account-service/api/v1/accounts/update-balance";
+//		Transaction fromTransaction = null;
+//		// Process the transaction
+//		boolean success = false;
+//		if(fromTransaction==null) {
+//			transactionService.processTransfer(fromTransaction, toTransaction,
+//					null, null);
+//			
+//		}else {
+//			fromTransaction = getFromTransaction(transferRequest, beneficiary);
+//			success = transactionService.processTransfer(fromTransaction, toTransaction,
+//					beneficiary.getBeneficiaryBankCode(), beneficiary.getBeneficiaryName());
+//		}
+//		if (!success) {
+//			return ResponseEntity.badRequest().body(new TransferResponseDTO(false, "Transaction failed"));
+//		}
+//
+//		// Update balance using Feign Client
+//		ResponseEntity<UpdateBalanceResponseDTO> response = accountClient.updateBalance(transferRequest);
+//
+//		
+//		System.out.println("update balance response : " + response);
+//		TransferResponseDTO transferResponse = new TransferResponseDTO();
+//		transferResponse.setSuccess(true);
+//		transferResponse.setMessage("Transfer completed successfully.");
+//		return ResponseEntity.ok(transferResponse);
+//	}
+
 	@PostMapping("/transfer")
 	public ResponseEntity<TransferResponseDTO> transfer(@RequestBody TransferRequestDTO transferRequest) {
-
-		BeneficiaryResponseDTO beneficiary = beneficiaryClient
+		BeneficiaryResponseDTO beneficiary = null;
+		if("COMPANY-TRANSFER".equals(transferRequest.getTranserType())) {
+			beneficiary = new BeneficiaryResponseDTO();
+			beneficiary.setBeneficiaryAccountNumber(transferRequest.getBeneficiaryAccountNumber());
+			
+		}else {
+			beneficiary = beneficiaryClient
 				.getBeneficiaryByCustomerId(transferRequest.getBeneficiaryId());
+		}
 		if (beneficiary == null) {
 			return ResponseEntity.badRequest().body(new TransferResponseDTO(false, "Beneficiary not found!"));
 		}
 		//passing beneficiary account no.  so setting beneficiary account number 
-		beneficiary.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
+		//beneficiary.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
 		transferRequest.setBeneficiaryAccountNumber(beneficiary.getBeneficiaryAccountNumber());
 		Transaction fromTransaction = getFromTransaction(transferRequest, beneficiary);
 

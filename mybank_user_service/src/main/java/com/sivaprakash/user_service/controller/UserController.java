@@ -69,6 +69,7 @@ public class UserController {
             response.setDateOfBirth(user.getDateOfBirth().toString());
             response.setAddress(user.getAddress()); 
             response.setCreatedAt(customerId != null ? customerId.toString() : null);
+            response.setRole(user.getRole().toString());
             logger.info("User validated successfully: {}", user.getUsername());
             return ResponseEntity.ok(response);
         }

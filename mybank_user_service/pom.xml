@@ -9,11 +9,11 @@
 		<version>3.3.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>user-management</groupId>
-	<artifactId>user-management</artifactId>
+	<groupId>loan-service</groupId>
+	<artifactId>loan-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>user-management</name>
-	<description>Demo project for Spring Boot</description>
+	<name>loan-service</name>
+	<description>Loan module for Spring Boot</description>
 	<url />
 	<licenses>
 		<license />

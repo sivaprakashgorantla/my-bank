@@ -3,6 +3,8 @@ package com.sivaprakash.loan.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.sivaprakash.loan.enums.LoanStatus;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,16 +12,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
-import com.sivaprakash.loan.enums.*;
+import jakarta.persistence.Table;
+
 @Entity
+@Table(name = "loan_applications")
 public class LoanApplication {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loan_id_seq")
 	@SequenceGenerator(name = "loan_id_seq", sequenceName = "loan_id_seq", allocationSize = 1)
 	private Long loanId;
-	private Long userId;
+	private Long customerId;
 	private Long productId;
-	private BigDecimal amount;
+	private BigDecimal loanAmount;
+	@Enumerated(EnumType.STRING)
+	private LoanType loanType;
 	private BigDecimal interestRate;
 	private Integer termMonths;
 	@Enumerated(EnumType.STRING)
@@ -30,24 +36,28 @@ public class LoanApplication {
 	private LocalDateTime lastPaymentDate;
 	private LocalDateTime nextPaymentDate;
 	private BigDecimal remainingAmount;
-	private String purpose;
+	private String loanPurpose;
 	private BigDecimal processingFee;
 	private Boolean processingFeePaid;
 	private String referenceNumber;
+
+	private String remarkInput;
 
 	public LoanApplication() {
 		super();
 	}
 
-	public LoanApplication(Long loanId, Long userId, Long productId, BigDecimal amount, BigDecimal interestRate,
-			Integer termMonths, LoanStatus status, LocalDateTime applicationDate, LocalDateTime approvalDate,
-			LocalDateTime disbursementDate, LocalDateTime lastPaymentDate, LocalDateTime nextPaymentDate,
-			BigDecimal remainingAmount, String purpose, BigDecimal processingFee, Boolean processingFeePaid) {
+	public LoanApplication(Long loanId, Long customerId, Long productId, BigDecimal loanAmount, LoanType loanType,
+			BigDecimal interestRate, Integer termMonths, LoanStatus status, LocalDateTime applicationDate,
+			LocalDateTime approvalDate, LocalDateTime disbursementDate, LocalDateTime lastPaymentDate,
+			LocalDateTime nextPaymentDate, BigDecimal remainingAmount, String loanPurpose, BigDecimal processingFee,
+			Boolean processingFeePaid, String referenceNumber, String remarkInput) {
 		super();
 		this.loanId = loanId;
-		this.userId = userId;
+		this.customerId = customerId;
 		this.productId = productId;
-		this.amount = amount;
+		this.loanAmount = loanAmount;
+		this.loanType = loanType;
 		this.interestRate = interestRate;
 		this.termMonths = termMonths;
 		this.status = status;
@@ -57,9 +67,11 @@ public class LoanApplication {
 		this.lastPaymentDate = lastPaymentDate;
 		this.nextPaymentDate = nextPaymentDate;
 		this.remainingAmount = remainingAmount;
-		this.purpose = purpose;
+		this.loanPurpose = loanPurpose;
 		this.processingFee = processingFee;
 		this.processingFeePaid = processingFeePaid;
+		this.referenceNumber = referenceNumber;
+		this.remarkInput = remarkInput;
 	}
 
 	public Long getLoanId() {
@@ -70,12 +82,12 @@ public class LoanApplication {
 		this.loanId = loanId;
 	}
 
-	public Long getUserId() {
-		return userId;
+	public Long getCustomerId() {
+		return customerId;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
 
 	public Long getProductId() {
@@ -86,12 +98,12 @@ public class LoanApplication {
 		this.productId = productId;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public BigDecimal getLoanAmount() {
+		return loanAmount;
 	}
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public void setLoanAmount(BigDecimal loanAmount) {
+		this.loanAmount = loanAmount;
 	}
 
 	public BigDecimal getInterestRate() {
@@ -166,12 +178,12 @@ public class LoanApplication {
 		this.remainingAmount = remainingAmount;
 	}
 
-	public String getPurpose() {
-		return purpose;
+	public String getLoanPurpose() {
+		return loanPurpose;
 	}
 
-	public void setPurpose(String purpose) {
-		this.purpose = purpose;
+	public void setLoanPurpose(String loanPurpose) {
+		this.loanPurpose = loanPurpose;
 	}
 
 	public BigDecimal getProcessingFee() {
@@ -198,5 +210,31 @@ public class LoanApplication {
 		this.referenceNumber = referenceNumber;
 	}
 
-	
+	public LoanType getLoanType() {
+		return loanType;
+	}
+
+	public void setLoanType(LoanType loanType) {
+		this.loanType = loanType;
+	}
+
+	public String getRemarkInput() {
+		return remarkInput;
+	}
+
+	public void setRemarkInput(String remarkInput) {
+		this.remarkInput = remarkInput;
+	}
+
+	@Override
+	public String toString() {
+		return "LoanApplication [loanId=" + loanId + ", customerId=" + customerId + ", productId=" + productId
+				+ ", loanAmount=" + loanAmount + ", loanType=" + loanType + ", interestRate=" + interestRate
+				+ ", termMonths=" + termMonths + ", status=" + status + ", applicationDate=" + applicationDate
+				+ ", approvalDate=" + approvalDate + ", disbursementDate=" + disbursementDate + ", lastPaymentDate="
+				+ lastPaymentDate + ", nextPaymentDate=" + nextPaymentDate + ", remainingAmount=" + remainingAmount
+				+ ", loanPurpose=" + loanPurpose + ", processingFee=" + processingFee + ", processingFeePaid="
+				+ processingFeePaid + ", referenceNumber=" + referenceNumber + ", remarkInput=" + remarkInput + "]";
+	}
+
 }

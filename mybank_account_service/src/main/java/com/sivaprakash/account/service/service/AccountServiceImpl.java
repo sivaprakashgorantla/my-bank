@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
 	private AccountRepository accountRepository;
 
 	@Autowired
-	private AccountTypeService accountTypeService;
+	private AccountTypeService accountTypeRepository;
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -45,7 +45,7 @@ public class AccountServiceImpl implements AccountService {
 	public AccountDetailsDTO createAccount(Long customerId) {
 		logger.info("Creating a new account with details: {}", customerId);
 
-		AccountType accountType = accountTypeService.findByTypeName(customerId %2 == 0 ? "CURRENT" : "SAVING");
+		AccountType accountType = accountTypeRepository.findByTypeName(customerId %2 == 0 ? "CURRENT" : "SAVING");
 
 		// Convert AccountDetailsDTO to Account entity
 		Account account = new Account();
@@ -189,6 +189,15 @@ public class AccountServiceImpl implements AccountService {
 			logger.error("Error occurred while fetching accounts: {}", e.getMessage(), e);
 			throw new RuntimeException("Error fetching accounts.", e);
 		}
+	}
+
+	@Override
+	public AccountDetailsDTO getCompanyAccount() {
+	    logger.info("Fetching company account details.");
+
+	    Account companyAccount = accountRepository.findByAccountType(accountTypeRepository.findByTypeName("COMPANY"))
+	            .orElseThrow(() -> new RuntimeException("No company account found."));
+	    return convertToDTO(companyAccount);
 	}
 
 }

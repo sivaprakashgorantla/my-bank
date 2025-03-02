@@ -31,6 +31,9 @@ public class LoanPayment {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Column(name = "payment_date", nullable = false)
+    private LocalDateTime paymentDate;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

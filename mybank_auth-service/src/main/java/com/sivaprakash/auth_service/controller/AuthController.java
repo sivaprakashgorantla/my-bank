@@ -44,7 +44,8 @@ public class AuthController {
             if(user != null) {
             	String customerId = authService.getCustomerByuserId(user.getUserId());
             	System.out.println("customerId 1 : "+customerId);
-            	String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId());
+            	System.out.println("Role : "+user.getRole());
+            	String token = jwtUtil.generateToken(user.getUsername(),user.getUserId(),user.getCustomerId(),user.getRole());
                 return ResponseEntity.ok(new AuthResponseDTO(token,user.getUserId(),user.getUsername(),customerId));
             }
 

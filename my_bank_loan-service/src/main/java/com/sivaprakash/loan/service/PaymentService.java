@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sivaprakash.loan.ProcessingFeePaymentRequest;
 import com.sivaprakash.loan.entity.LoanApplication;
 import com.sivaprakash.loan.entity.LoanPayment;
 import com.sivaprakash.loan.entity.PaymentEvent;
@@ -14,6 +13,7 @@ import com.sivaprakash.loan.enums.PaymentStatus;
 import com.sivaprakash.loan.repository.PaymentEventRepository;
 import com.sivaprakash.loan.repository.PaymentRepository;
 import com.sivaprakash.loan.request.PaymentRequest;
+import com.sivaprakash.loan.request.ProcessingFeePaymentRequest;
 import com.sivaprakash.loan.response.PaymentResponse;
 
 @Service

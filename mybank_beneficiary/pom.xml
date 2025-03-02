@@ -12,7 +12,7 @@
 	<groupId>mybank_beneficiary</groupId>
 	<artifactId>mybank_beneficiary</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fund-transfer</name>
+	<name>mybank_beneficiary</name>
 	<description>Demo project for Spring Boot</description>
 	<url />
 	<licenses>

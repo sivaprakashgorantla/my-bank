@@ -56,6 +56,23 @@
     >
       Beneficiary
     </button>
+
+     <!-- Apply for Loan Button -->
+     <button
+     class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+     [routerLink]="['/app-loan-application']"
+   >
+     Apply for Loan
+   </button>
+   
+       <!-- Approvals button for admin visible only -->
+       <button *ngIf="isAdmin"
+       class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+       [routerLink]="['/app-loan-approvals']"
+     >
+       Loan Approvals
+     </button>
+     
   </div>
   
   <!-- Account Details Section -->

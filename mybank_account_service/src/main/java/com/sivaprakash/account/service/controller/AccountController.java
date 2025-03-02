@@ -1,5 +1,6 @@
 package com.sivaprakash.account.service.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,14 +33,14 @@ public class AccountController {
 
 	@PostMapping("/create/{customerId}")
 	public ResponseEntity<Boolean> createAccount(@PathVariable Long customerId) {
-	    logger.info("Creating new account for customerId:  {}", customerId);
-	    try {
-	        accountService.createAccount(customerId);
-	        return ResponseEntity.status(HttpStatus.CREATED).body(true);
-	    } catch (Exception e) {
-	        logger.error("Error occurred while creating account: {}", e.getMessage(), e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-	    }
+		logger.info("Creating new account for customerId:  {}", customerId);
+		try {
+			accountService.createAccount(customerId);
+			return ResponseEntity.status(HttpStatus.CREATED).body(true);
+		} catch (Exception e) {
+			logger.error("Error occurred while creating account: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+		}
 	}
 
 	@GetMapping("/customer/{customerId}")
@@ -71,6 +72,26 @@ public class AccountController {
 
 		return ResponseEntity.ok().body(new AccountResponseDTO("Accounts retrieved successfully", accounts));
 	}
+	@GetMapping("/company-account")
+	public ResponseEntity<AccountResponseDTO> getCompanyAccount() {
+	    logger.info("Fetching company account details.");
+
+	    try {
+	        AccountDetailsDTO accounts = accountService.getCompanyAccount();
+	        logger.debug("Company account details retrieved: {}", accounts);
+
+	        if (accounts == null) {
+	            logger.warn("No company account found.");
+	            return ResponseEntity.ok().body(new AccountResponseDTO("No company account found", null));
+	        }
+
+	        return ResponseEntity.ok().body(new AccountResponseDTO("Company account retrieved successfully", Arrays.asList(accounts)));
+	    } catch (Exception e) {
+	        logger.error("Error occurred while fetching company account: {}", e.getMessage(), e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(new AccountResponseDTO("Failed to retrieve company account", null));
+	    }
+	}
 
 	@PutMapping("/update-balance")
 	public ResponseEntity<UpdateBalanceResponseDTO> updateAccountBalance(
@@ -78,22 +99,34 @@ public class AccountController {
 		logger.info("Updating account balances for transfer: {}", transferRequestDTO);
 
 		try {
-			//Account account = accountService.get.
-			boolean debitSuccess = accountService.updateAccountBalance(transferRequestDTO.getSelectedAccount(),
-					transferRequestDTO.getTransferAmount(), "DEBIT");
-
-			boolean creditSuccess = accountService.updateAccountBalance(
-					transferRequestDTO.getBeneficiaryAccountNumber(), transferRequestDTO.getTransferAmount(), "CREDIT");
-
-			boolean success = debitSuccess && creditSuccess;
-
-			logger.debug("Debit success: {}, Credit success: {}", debitSuccess, creditSuccess);
-
 			UpdateBalanceResponseDTO response = new UpdateBalanceResponseDTO();
-			response.setSuccess(success);
-			response.setMessage(
-					success ? "Account balance updated successfully." : "Failed to update account balance.");
 
+			if (transferRequestDTO.getBeneficiaryAccountNumber() == null) {
+
+				boolean creditSuccess = accountService.updateAccountBalance(
+						transferRequestDTO.getSelectedAccount(), transferRequestDTO.getTransferAmount(),
+						"CREDIT");
+				response.setSuccess(creditSuccess);
+				response.setMessage(
+						creditSuccess ? "Account balance updated successfully." : "Failed to update account balance.");
+
+			} else {
+				// Account account = accountService.get.
+				boolean debitSuccess = accountService.updateAccountBalance(transferRequestDTO.getSelectedAccount(),
+						transferRequestDTO.getTransferAmount(), "DEBIT");
+
+				boolean creditSuccess = accountService.updateAccountBalance(
+						transferRequestDTO.getBeneficiaryAccountNumber(), transferRequestDTO.getTransferAmount(),
+						"CREDIT");
+
+				boolean success = debitSuccess && creditSuccess;
+
+				logger.debug("Debit success: {}, Credit success: {}", debitSuccess, creditSuccess);
+
+				response.setSuccess(success);
+				response.setMessage(
+						success ? "Account balance updated successfully." : "Failed to update account balance.");
+			}
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			logger.error("Error occurred while updating balance: {}", e.getMessage(), e);
@@ -108,22 +141,22 @@ public class AccountController {
 
 	@GetMapping("/all")
 	public ResponseEntity<List<AccountDetailsDTO>> getAccounts() {
-	    logger.info("Fetching all accounts.");
+		logger.info("Fetching all accounts.");
 
-	    try {
-	        List<AccountDetailsDTO> accounts = accountService.getAccounts();
-	        logger.debug("Account details retrieved: {}", accounts);
+		try {
+			List<AccountDetailsDTO> accounts = accountService.getAccounts();
+			logger.debug("Account details retrieved: {}", accounts);
 
-	        if (accounts.isEmpty()) {
-	            logger.warn("No accounts found.");
-	            return ResponseEntity.ok().body(List.of()); // Return an empty list instead of null
-	        }
+			if (accounts.isEmpty()) {
+				logger.warn("No accounts found.");
+				return ResponseEntity.ok().body(List.of()); // Return an empty list instead of null
+			}
 
-	        return ResponseEntity.ok().body(accounts);
-	    } catch (Exception e) {
-	        logger.error("Error occurred while fetching all accounts: {}", e.getMessage(), e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-	    }
+			return ResponseEntity.ok().body(accounts);
+		} catch (Exception e) {
+			logger.error("Error occurred while fetching all accounts: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
 	}
-	
+
 }

@@ -7,6 +7,7 @@ public class TransferRequestDTO {
     private BigDecimal transferAmount;
     private Long beneficiaryId;
     private String beneficiaryAccountNumber;
+    private String transerType;
 
     public String getSelectedAccount() {
         return selectedAccount;
@@ -41,10 +42,19 @@ public class TransferRequestDTO {
 		this.beneficiaryAccountNumber = beneficiaryAccountNumber;
 	}
 
+	public String getTranserType() {
+		return transerType;
+	}
+
+	public void setTranserType(String transerType) {
+		this.transerType = transerType;
+	}
+
 	@Override
 	public String toString() {
 		return "TransferRequestDTO [selectedAccount=" + selectedAccount + ", transferAmount=" + transferAmount
-				+ ", beneficiaryId=" + beneficiaryId + ", beneficiaryAccountNumber=" + beneficiaryAccountNumber + "]";
+				+ ", beneficiaryId=" + beneficiaryId + ", beneficiaryAccountNumber=" + beneficiaryAccountNumber
+				+ ", transerType=" + transerType + "]";
 	}
 
 	

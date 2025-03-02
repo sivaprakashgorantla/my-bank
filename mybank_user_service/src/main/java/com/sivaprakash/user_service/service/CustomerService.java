@@ -91,6 +91,31 @@ public class CustomerService {
         logger.info("OTP validated and profile updated for username: {}", request.getUsername());
     }
 
+    @Transactional(readOnly = true)
+    public CustomerProfileDTO getCustomerDetailsById(Long customerId) {
+        logger.info("Fetching customer details for customer ID: {}", customerId);
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + customerId));
+
+        User user = customer.getUser();
+        if (user == null) {
+            logger.warn("User not found for customer ID: {}", customerId);
+            throw new ResourceNotFoundException("User not found for customer ID: " + customerId);
+        }
+
+        CustomerProfileDTO dto = new CustomerProfileDTO();
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setMobileNo(maskMobileNumber(user.getPhoneNumber()));
+        dto.setEmailId(maskEmail(user.getEmail()));
+        dto.setCustomerId(customer.getCustomerId());
+        dto.setProfileStatus(customer.getProfileStatus());
+
+        logger.info("Customer details fetched successfully for customer ID: {}", customerId);
+        return dto;
+    }
+
     private String maskMobileNumber(String mobileNo) {
         return "XXXXXX" + mobileNo.substring(mobileNo.length() - 4);
     }

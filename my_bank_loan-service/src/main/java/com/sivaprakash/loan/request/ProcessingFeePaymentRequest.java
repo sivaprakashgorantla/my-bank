@@ -1,4 +1,4 @@
-package com.sivaprakash.loan;
+package com.sivaprakash.loan.request;
 
 import java.math.BigDecimal;
 

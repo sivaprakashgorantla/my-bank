@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.sivaprakash.account.service.dto.AccountDetailsDTO;
+import com.sivaprakash.account.service.entiry.AccountType;
 
 public interface AccountService {
 
@@ -19,5 +20,7 @@ public interface AccountService {
 	boolean updateAccountBalance(String accountNumber, BigDecimal amount, String transactionType);
 
 	List<AccountDetailsDTO> getAccounts();
+	
+	AccountDetailsDTO getCompanyAccount();
 
 }

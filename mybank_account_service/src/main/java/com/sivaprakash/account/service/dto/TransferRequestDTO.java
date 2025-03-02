@@ -8,6 +8,11 @@ public class TransferRequestDTO {
 	private BigDecimal transferAmount;
 	private String beneficiaryId;
 
+	
+	public TransferRequestDTO() {
+		super();
+	}
+
 	public TransferRequestDTO(String selectedAccount, String beneficiaryAccountNumber, BigDecimal transferAmount,
 			String beneficiaryId) {
 		super();
