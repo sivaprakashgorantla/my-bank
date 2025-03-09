@@ -28,6 +28,8 @@ public class LoanApplicationRequest {
 	private Integer termMonths;
 
 	private Long productId;
+	
+	private String loanType;
 
 	
 	public LoanApplicationRequest() {
@@ -37,15 +39,17 @@ public class LoanApplicationRequest {
 	public LoanApplicationRequest(@NotNull(message = "customer ID is required") Long customerId,
 			@NotNull(message = "Loan amount is required") @Positive(message = "Loan amount must be greater than zero") BigDecimal loanAmount,
 			@NotNull(message = "Loan purpose is required") @Size(min = 5, max = 200, message = "Loan purpose must be between 5 and 200 characters") String loanPurpose,
-			@NotNull(message = "Term months is required") @Min(value = 3, message = "Minimum loan term is 3 months") @Max(value = 60, message = "Maximum loan term is 60 months") Integer termMonths,
-			Long productId) {
+			@NotNull(message = "Term months is required") @Min(value = 3, message = "Minimum loan term is 3 months")
+			@Max(value = 60, message = "Maximum loan term is 60 months") Integer termMonths,
+			Long productId,
+			String loanType) {
 		super();
 		this.customerId = customerId;
 		this.loanAmount = loanAmount;
 		this.loanPurpose = loanPurpose;
 		this.termMonths = termMonths;
 		this.productId = productId;
-
+		this.loanType = loanType;
 	}
 
 	public Long getCustomerId() {
@@ -88,6 +92,16 @@ public class LoanApplicationRequest {
 	public void setProductId(Long productId) {
 		this.productId = productId;
 	}
+
+	
+	public String getLoanType() {
+		return loanType;
+	}
+
+	public void setLoanType(String loanType) {
+		this.loanType = loanType;
+	}
+
 
 	public static class CustomerDetails {
 		private String employmentType;
@@ -139,7 +153,6 @@ public class LoanApplicationRequest {
 		public void setExistingLoans(List<String> existingLoans) {
 			this.existingLoans = existingLoans;
 		}
-
 	}
 }
 

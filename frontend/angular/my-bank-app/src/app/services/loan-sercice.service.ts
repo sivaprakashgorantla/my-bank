@@ -14,7 +14,8 @@ export class LoanSerciceService {
   applyForLoan(
     loanAmount: number,
     loanPurpose: string,
-    termMonths: number
+    termMonths: number,
+    loanType: string,
   ): Observable<any> {
     const token = localStorage.getItem('auth-token');
     const customerId: number = parseInt(
@@ -29,7 +30,7 @@ export class LoanSerciceService {
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    const applyLoan = { customerId, loanAmount, loanPurpose, termMonths };
+    const applyLoan = { customerId, loanAmount, loanPurpose, termMonths ,loanType};
 
     return this.httpClient.post<any>(`${this.url}apply`, applyLoan, {
       headers,
@@ -63,9 +64,10 @@ export class LoanSerciceService {
   //     headers,
   //   });
   // }
-  approveLoan(loanId: any, remarkInput: string): Observable<any> {
+  approveLoan(loanId: any, remarkInput: string,status:string): Observable<any> {
     console.log('Loan ID:', loanId);
     console.log('Remark:', remarkInput);
+    console.log('Status:', status);
     const token = localStorage.getItem('auth-token');
     console.log('Token in getTransactionsByAccountNumber:', token); // Debugging token retrieval
     console.log('accountNumber in getTransactionsByAccountNumber:'); // Debugging userId retrieval
@@ -83,6 +85,7 @@ export class LoanSerciceService {
     const loanApplication = {
       loanId,
       remarkInput,
+      status
     };
 
     return this.httpClient.put<any>(`${this.url}approve`, loanApplication,{

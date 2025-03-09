@@ -3,13 +3,23 @@ package com.sivaprakash.fund.dto;
 import java.math.BigDecimal;
 
 public class TransferRequestDTO {
+	private Long customerId;
     private String selectedAccount;
     private BigDecimal transferAmount;
     private Long beneficiaryId;
     private String beneficiaryAccountNumber;
     private String transerType;
 
-    public String getSelectedAccount() {
+    
+    public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public String getSelectedAccount() {
         return selectedAccount;
     }
 

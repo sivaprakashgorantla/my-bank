@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ import com.sivaprakash.loan.response.AccountDetailsDTO;
 import com.sivaprakash.loan.response.AccountResponseDTO;
 import com.sivaprakash.loan.response.CustomerResponse;
 import com.sivaprakash.loan.response.LoanApplicationResponse;
-import com.sivaprakash.loan.response.TransactionResponseDTO;
+import com.sivaprakash.loan.response.TransferResponseDTO;
 import com.sivaprakash.loan.response.UpdateBalanceResponseDTO;
 
 import jakarta.transaction.Transactional;
@@ -52,6 +54,7 @@ public class LoanService {
 
 	@Autowired
 	private TransactionClient transactionClient;
+	
 
 	public LoanApplicationResponse createLoanApplication(LoanApplicationRequest request) {
 		logger.info("Creating loan application for customer ID: {}", request.getCustomerId());
@@ -59,7 +62,7 @@ public class LoanService {
 		validateLoanRequest(request);
 
 		LoanApplication loan = buildLoanApplication(request);
-		loan = loanRepository.save(loan);
+		//loan = loanRepository.save(loan);
 		BigDecimal bigDecimalValue = BigDecimal.valueOf(loan.getLoanType().getInterestRate());
 		loan.setInterestRate(bigDecimalValue);
 		String referenceNumber = generateReferenceNumber(loan.getLoanId());
@@ -178,6 +181,8 @@ public class LoanService {
 		loan.setApplicationDate(LocalDateTime.now());
 		loan.setProcessingFee(calculateProcessingFee(request.getLoanAmount()));
 		loan.setProcessingFeePaid(false);
+		LoanType loanType = LoanType.valueOf(request.getLoanType());
+		loan.setLoanType(loanType);
 		return loan;
 	}
 
@@ -187,9 +192,7 @@ public class LoanService {
 	}
 
 	private String generateReferenceNumber(Long loanId) {
-		String reference = "REF-" + loanId + "-" + System.currentTimeMillis();
-		logger.debug("Generated reference number: {}", reference);
-		return reference;
+	    return String.format("REF-%d-%s", loanId, LocalDateTime.now().toString().replace(":", "").replace("-", ""));
 	}
 
 	private LoanApplicationResponse buildLoanApplicationResponse(LoanApplication loan) {
@@ -203,11 +206,11 @@ public class LoanService {
 		List<String> errors = new ArrayList<>();
 		logger.debug("Validating loan request for customer ID: {}", request.getCustomerId());
 
-		if (request.getCustomerId() == null) {
-			errors.add("Customer ID is required");
+		if (Objects.isNull(request.getCustomerId())) {
+		    throw new ValidationException("Customer ID is required");
 		}
 		if (request.getLoanAmount() == null || request.getLoanAmount().compareTo(BigDecimal.ZERO) <= 0) {
-			errors.add("Loan amount must be greater than zero");
+		    throw new ValidationException("Loan amount must be greater than zero");
 		}
 		if (request.getLoanPurpose() == null || request.getLoanPurpose().trim().isEmpty()) {
 			errors.add("Loan purpose is required");
@@ -306,9 +309,7 @@ public class LoanService {
 		logger.error("Error updating account balance: {}", e.getMessage(), e);
 		throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update account balance.");
 	}
-*/
-	
-	public LoanApplication approveLoan(LoanUpdateRequest request) {
+*/public LoanApplication approveLoan(LoanUpdateRequest request) {
 	    logger.info("Approving loan with ID: {}", request.getLoanId());
 	    LoanApplication loan = getLoanApplication(request.getLoanId());
 
@@ -316,49 +317,49 @@ public class LoanService {
 	        logger.warn("Attempted approval on non-pending loan ID: {}", request.getLoanId());
 	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending loans can be approved");
 	    }
-
-	    loan.setStatus(LoanStatus.APPROVED);
-	    loan.setRemarkInput(request.getRemarkInput());
-	    loan.setApprovalDate(LocalDateTime.now());
-	    loanRepository.save(loan);
-	    logger.info("Loan approved successfully for loan ID: {}", request.getLoanId());
+	    
+	    try {
+		
+	    	if ("APPROVED".equals(request.getStatus().toUpperCase())) { 
+	    	    loan.setStatus(LoanStatus.APPROVED);
+	    	}else {
+	    	    loan.setStatus(LoanStatus.REJECTED);  // Or any other appropriate status
+	    	}
+			loan.setRemarkInput(request.getRemarkInput());
+			loan.setApprovalDate(LocalDateTime.now());
+			logger.info("Updating loan status for ID: {} with status: {}", request.getLoanId(), loan.getStatus());
+			loanRepository.save(loan);
+			logger.info("Loan status updated successfully.");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//logger.info("Error whle same : ",e.printStackTrace());
+		}
 
 	    try {
+	    	if ("REJECTED".equals(request.getStatus().toUpperCase())) { 
+	    	    loan.setStatus(LoanStatus.REJECTED);
+	    	}
+
+	    	AccountDetailsDTO companyAccountDetailsDTO = getCompanyAccount();
 	        // Fetch company (lender's) account details
-	        ResponseEntity<AccountResponseDTO> companyAccountResponse = accountFeignClient.getCompanyAccount();
-	        if (!companyAccountResponse.getStatusCode().is2xxSuccessful() || companyAccountResponse.getBody() == null) {
-	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch company account details");
-	        }
+	        
 
-	        //AccountDetailsDTO companyAccount = companyAccountResponse.getBody().getAccounts().get(0);
-	        String companyAccountNumber = companyAccountResponse.getBody().getAccounts().get(0).getAccountNumber();
-	        BigDecimal companyBalance = companyAccountResponse.getBody().getAccounts().get(0).getBalance();
+	        String companyAccountNumber = companyAccountDetailsDTO.getAccountNumber();
+	        BigDecimal companyBalance = companyAccountDetailsDTO.getBalance();
 
-	        BigDecimal disbursementAmount = loan.getLoanAmount().subtract(loan.getProcessingFee());
+	        BigDecimal disbursementAmount = Optional.ofNullable(loan.getLoanAmount())
+	        	    .orElse(BigDecimal.ZERO)
+	        	    .subtract(Optional.ofNullable(loan.getProcessingFee()).orElse(BigDecimal.ZERO));
 
-	        // Check if company balance is sufficient
-	        if (companyBalance.compareTo(disbursementAmount) < 0) {
-	            BigDecimal reloadAmount = disbursementAmount.subtract(companyBalance).add(new BigDecimal("10000000")); // Extra buffer
-	            logger.info("Insufficient funds in company account. Reloading with amount: {}", reloadAmount);
 
-	            TransferRequestDTO reloadRequest = new TransferRequestDTO();
-	            reloadRequest.setSelectedAccount(companyAccountNumber);
-	            reloadRequest.setTransferAmount(reloadAmount);
-
-	            ResponseEntity<UpdateBalanceResponseDTO> reloadResponse = accountFeignClient.updateAccountBalance(reloadRequest);
-
-	            if (!reloadResponse.getStatusCode().is2xxSuccessful()) {
-	                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to reload company account");
-	            }
-
-	            logger.info("Company account reloaded successfully with amount: {}", reloadAmount);
-	        }
-
-	        // Debit company account and credit customer account
+	        checkCompanyAccountBalance(companyBalance,disbursementAmount,companyAccountNumber);
+	        
 	        ResponseEntity<AccountResponseDTO> customerAccountResponse = accountFeignClient.getAccountsByCustomerId(loan.getCustomerId());
-	        if (!customerAccountResponse.getStatusCode().is2xxSuccessful() || customerAccountResponse.getBody() == null) {
-	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch customer account details");
-	        }
+
+	        Optional.ofNullable(customerAccountResponse.getBody())
+	                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch customer account details"));
+
 
 	        String customerAccountNumber = customerAccountResponse.getBody().getAccounts().get(0).getAccountNumber();
 
@@ -368,7 +369,9 @@ public class LoanService {
 	        transactionDTO.setBeneficiaryAccountNumber(customerAccountNumber);
 	        transactionDTO.setTransferAmount(disbursementAmount);
 	        transactionDTO.setTranserType("COMPANY-TRANSFER");
-	        ResponseEntity<TransactionResponseDTO> transactionResponse = transactionClient.createTransaction(transactionDTO);
+	        String str = transactionClient.greatings();
+	        String str1 = transactionClient.wish("Sivaprakash Gorntla");
+	        ResponseEntity<TransferResponseDTO> transactionResponse = transactionClient.transfer(transactionDTO);
 	        if (!transactionResponse.getStatusCode().is2xxSuccessful()) {
 	            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to record loan disbursement transaction");
 	        }
@@ -381,5 +384,36 @@ public class LoanService {
 
 	    return loan;
 	}
+
+private void checkCompanyAccountBalance(BigDecimal companyBalance, BigDecimal disbursementAmount,String companyAccountNumber) {
+	// TODO Auto-generated method stub
+	// Check if company balance is sufficient
+    if (companyBalance.compareTo(disbursementAmount) < 0) {
+        BigDecimal reloadAmount = disbursementAmount.subtract(companyBalance).add(new BigDecimal("10000000")); // Extra buffer
+        logger.info("Insufficient funds in company account. Reloading with amount: {}", reloadAmount);
+
+        TransferRequestDTO reloadRequest = new TransferRequestDTO();
+        reloadRequest.setSelectedAccount(companyAccountNumber);
+        reloadRequest.setTransferAmount(reloadAmount);
+
+        ResponseEntity<UpdateBalanceResponseDTO> reloadResponse = accountFeignClient.updateAccountBalance(reloadRequest);
+
+        if (!reloadResponse.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to reload company account");
+        }
+
+        logger.info("Company account reloaded successfully with amount: {}", reloadAmount);
+    }
+
+}
+
+private AccountDetailsDTO getCompanyAccount() {
+	// TODO Auto-generated method stub
+	ResponseEntity<AccountResponseDTO> companyAccountResponse = accountFeignClient.getCompanyAccount();
+    if (!companyAccountResponse.getStatusCode().is2xxSuccessful() || companyAccountResponse.getBody() == null) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch company account details");
+    }
+	return  companyAccountResponse.getBody().getAccounts().get(0);
+}
 
 }

@@ -37,7 +37,7 @@ export class LoanApplicationComponent implements OnInit {
 
   submitLoanApplication() {
     this.loanService
-      .applyForLoan(this.loanAmount, this.loanPurpose, this.termMonths)
+      .applyForLoan(this.loanAmount, this.loanPurpose, this.termMonths, this.loanType)
       .subscribe({
         next: (response) => {
           this.referenceNumber =

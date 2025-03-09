@@ -20,9 +20,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Transactional(readOnly = true)
 	public List<TransactionDTO> getLastTenTransactions(String accountNumber) {
-		System.out.println("getLastTenTransactions : "+accountNumber);
-	    List<Transaction> transactions = transactionRepository.findLast10Transactions(accountNumber);
-	    return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
+		System.out.println("getLastTenTransactions : " + accountNumber);
+		List<Transaction> transactions = transactionRepository.findLast10Transactions(accountNumber);
+		return transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
 //					criteria.getAccountId());
 //		}
 //
-		return null;//transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
+		return null;// transactions.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	private TransactionDTO convertToDTO(Transaction transaction) {
@@ -68,29 +68,29 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	@Transactional
-    public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction,String beneficiaryBankCode,String beneficiaryName) {
-        try {
-        	if(fromTransaction!= null && beneficiaryBankCode!=null && beneficiaryName!= null) { // checking loan transaction
-        		// Save the debit transaction (fromTransaction)
-        		fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
-        		transactionRepository.save(fromTransaction);
-        	}
-            // Save the credit transaction (toTransaction)
-            toTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
-            transactionRepository.save(toTransaction);
+	//@Transactional
+	public boolean processTransfer(Transaction fromTransaction, Transaction toTransaction) {
+		try {
+																										// transaction
+				// Save the debit transaction (fromTransaction)
+				fromTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+				transactionRepository.save(fromTransaction);
+							// Save the credit transaction (toTransaction)
+				toTransaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+				transactionRepository.save(toTransaction);
+				return true;
+			
+		} catch (Exception e) {
+			// Log the error
+			e.printStackTrace();
 
-            return true;
-        } catch (Exception e) {
-            // Log the error
-            e.printStackTrace();
+			// If any error occurs, set both transactions as FAILED and save them
+			fromTransaction.setStatus(Transaction.TransactionStatus.FAILED);
+			toTransaction.setStatus(Transaction.TransactionStatus.FAILED);
+			transactionRepository.save(fromTransaction);
+			transactionRepository.save(toTransaction);
 
-            // If any error occurs, set both transactions as FAILED and save them
-            fromTransaction.setStatus(Transaction.TransactionStatus.FAILED);
-            toTransaction.setStatus(Transaction.TransactionStatus.FAILED);
-            transactionRepository.save(fromTransaction);
-            transactionRepository.save(toTransaction);
-
-            return false;
-        }
-    }}
+			return false;
+		}
+	}
+}
